@@ -1,0 +1,383 @@
+/* =========================================
+   REGISTRATION WIZARD PAGE
+========================================= */
+
+.wizard-page {
+    min-height: 100vh;
+    background: #f5f5f6;
+}
+
+
+/* =========================================
+   MAIN AREA
+========================================= */
+
+.wizard-main {
+    width: 100%;
+    padding: 35px 25px 50px;
+}
+
+
+.wizard-card {
+    width: min(1200px, 100%);
+    margin: 0 auto;
+
+    background: #ffffff;
+
+    border: 1px solid #e2e2e2;
+    border-radius: 14px;
+
+    overflow: hidden;
+}
+
+
+/* =========================================
+   WIZARD HEADER
+========================================= */
+
+.wizard-header {
+    padding: 28px 35px 22px;
+
+    border-bottom: 1px solid #eeeeee;
+}
+
+
+.wizard-header h1 {
+    margin: 0;
+
+    color: #c90000;
+
+    font-size: 24px;
+    font-weight: 700;
+}
+
+
+.wizard-header p {
+    margin: 6px 0 0;
+
+    color: #777777;
+
+    font-size: 13px;
+}
+
+
+/* =========================================
+   PROGRESS
+========================================= */
+
+.wizard-progress {
+    display: flex;
+
+    padding: 25px 35px 20px;
+
+    border-bottom: 1px solid #eeeeee;
+
+    overflow-x: auto;
+}
+
+
+.wizard-progress-item {
+    position: relative;
+
+    flex: 1;
+
+    min-width: 120px;
+
+    text-align: center;
+}
+
+
+.wizard-step-top {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+}
+
+
+.wizard-step-circle {
+    position: relative;
+    z-index: 2;
+
+    width: 34px;
+    height: 34px;
+
+    margin: 0 auto;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #dddddd;
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    color: #999999;
+
+    font-size: 13px;
+    font-weight: 600;
+}
+
+
+.wizard-progress-item.current .wizard-step-circle {
+    border-color: #c90000;
+
+    background: #c90000;
+
+    color: #ffffff;
+}
+
+
+.wizard-progress-item.completed .wizard-step-circle {
+    border-color: #c90000;
+
+    background: #ffffff;
+
+    color: #c90000;
+}
+
+
+.wizard-progress-line {
+    position: absolute;
+
+    top: 50%;
+    left: calc(50% + 17px);
+
+    width: calc(100% - 34px);
+
+    height: 2px;
+
+    transform: translateY(-50%);
+
+    background: #dddddd;
+}
+
+
+.wizard-progress-item.completed .wizard-progress-line {
+    background: #c90000;
+}
+
+
+.wizard-step-label {
+    margin-top: 9px;
+}
+
+
+.wizard-step-title {
+    color: #888888;
+
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+.wizard-progress-item.current .wizard-step-title,
+.wizard-progress-item.completed .wizard-step-title {
+    color: #c90000;
+}
+
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.wizard-content {
+    padding: 30px 35px;
+}
+
+
+.wizard-step-heading {
+    margin-bottom: 25px;
+}
+
+
+.wizard-step-heading span {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: #999999;
+
+    font-size: 11px;
+    font-weight: 600;
+
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+.wizard-step-heading h2 {
+    margin: 0;
+
+    color: #444444;
+
+    font-size: 20px;
+    font-weight: 700;
+}
+
+
+.wizard-section {
+    width: 100%;
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+
+.wizard-navigation {
+    display: flex;
+
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 20px 35px;
+
+    border-top: 1px solid #eeeeee;
+
+    background: #fafafa;
+}
+
+
+.wizard-navigation-left,
+.wizard-navigation-right {
+    display: flex;
+    align-items: center;
+}
+
+
+.wizard-previous-button,
+.wizard-next-button,
+.wizard-submit-button {
+    min-height: 42px;
+
+    padding: 0 22px;
+
+    border-radius: 6px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.2s ease;
+}
+
+
+.wizard-previous-button {
+    border: 1px solid #d8d8d8;
+
+    background: #ffffff;
+
+    color: #666666;
+}
+
+
+.wizard-previous-button:hover {
+    border-color: #c90000;
+
+    color: #c90000;
+}
+
+
+.wizard-next-button,
+.wizard-submit-button {
+    border: 1px solid #c90000;
+
+    background: #c90000;
+
+    color: #ffffff;
+}
+
+
+.wizard-next-button:hover,
+.wizard-submit-button:hover {
+    background: #a90000;
+
+    border-color: #a90000;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 767.98px) {
+
+    .wizard-main {
+        padding: 15px 10px 30px;
+    }
+
+
+    .wizard-card {
+        border-radius: 10px;
+    }
+
+
+    .wizard-header {
+        padding: 22px 20px 18px;
+    }
+
+
+    .wizard-header h1 {
+        font-size: 20px;
+    }
+
+
+    .wizard-progress {
+        padding: 20px 15px 15px;
+    }
+
+
+    .wizard-progress-item {
+        min-width: 90px;
+    }
+
+
+    .wizard-step-circle {
+        width: 30px;
+        height: 30px;
+
+        font-size: 11px;
+    }
+
+
+    .wizard-progress-line {
+        left: calc(50% + 15px);
+
+        width: calc(100% - 30px);
+    }
+
+
+    .wizard-step-title {
+        font-size: 10px;
+    }
+
+
+    .wizard-content {
+        padding: 25px 20px;
+    }
+
+
+    .wizard-step-heading h2 {
+        font-size: 18px;
+    }
+
+
+    .wizard-navigation {
+        padding: 15px 20px;
+    }
+
+
+    .wizard-previous-button,
+    .wizard-next-button,
+    .wizard-submit-button {
+        min-height: 40px;
+
+        padding: 0 16px;
+
+        font-size: 12px;
+    }
+
+}
