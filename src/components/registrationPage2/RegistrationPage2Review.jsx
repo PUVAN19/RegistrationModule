@@ -2,7 +2,9 @@ function RegistrationPage2Review({
     formData,
     onEditStep,
     onChange,
-    onConfirm
+    onConfirm,
+    isSubmitting,
+    submitError
 }) {
 
     const getFileName = (file) => {
@@ -381,14 +383,23 @@ function RegistrationPage2Review({
                 <div />
 
                 <button
-                    type="button"
-                    className="page2-continue-button"
-                    disabled={!formData.declarationAccepted}
-                    onClick={onConfirm}
-                >
-                    Confirm & Proceed to Payment
-                    <span>→</span>
-                </button>
+    type="button"
+    className="page2-continue-button"
+    disabled={
+        !formData.declarationAccepted ||
+        isSubmitting
+    }
+    onClick={onConfirm}
+>
+    {isSubmitting
+        ? "Saving..."
+        : "Confirm & Proceed to Payment"
+    }
+
+    <span>
+        {isSubmitting ? "..." : "→"}
+    </span>
+</button>
 
             </div>
 

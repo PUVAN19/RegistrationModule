@@ -1,4 +1,6 @@
 import { useNavigate } from "react-router-dom";
+import "../../styles/RegHeader.css";
+ 
 function RegistrationHeader() {
     const navigate = useNavigate();
     return (

@@ -11,7 +11,7 @@ import RegistrationPage2Progress from "./RegistrationPage2Progress";
 import RegistrationPage2Navigation from "./RegistrationPage2Navigation";
 import RegistrationPage2Review from "./RegistrationPage2Review";
 import RegistrationPaymentPage from "./RegistrationPaymentPage";
-
+import CreateAccount from "./CreateAccount";
 
 import "../../styles/registrationpage.css";
 
@@ -55,6 +55,12 @@ const registrationSteps = [
         key: "payment",
         shortTitle: "Payment",
         component: null
+    },
+     {
+        id: 7,
+        key: "account",
+        shortTitle: "Account",
+        component: null
     }
 ];
 
@@ -64,7 +70,7 @@ function RegistrationPage2Layout() {
     const [currentStep, setCurrentStep] = useState(1);
 
     const [completedSteps, setCompletedSteps] = useState([]);
-
+const [paymentResult, setPaymentResult] = useState(null);
     const [formData, setFormData] = useState({
         applicantName: "",
         dateOfBirth: null,
@@ -103,7 +109,7 @@ function RegistrationPage2Layout() {
     });
 
 
-    const handleChange = (event) => {
+const handleChange = (event) => {
 
         const {
             name,
@@ -165,16 +171,15 @@ function RegistrationPage2Layout() {
     // Review's own "Confirm & Proceed to Payment" button advances
     // to the Payment step, same as handleNext, but always from
     // step 5 regardless of where it's called from.
-    const handleConfirmApplication = () => {
+ const handleConfirmApplication = () => {
+    setCompletedSteps((previous) =>
+        previous.includes(5)
+            ? previous
+            : [...previous, 5]
+    );
 
-        setCompletedSteps((previous) =>
-            previous.includes(5) ? previous : [...previous, 5]
-        );
-
-        setCurrentStep(6);
-    };
-
-
+    setCurrentStep(6);
+};
     const handleBackToReview = () => {
         setCurrentStep(5);
     };
@@ -195,9 +200,29 @@ function RegistrationPage2Layout() {
     const showSharedNavigation = currentStep <= 4;
 
 
+
+const handlePaymentSuccess = (result) => {
+    setPaymentResult(result);
+    setCompletedSteps(previous =>
+        previous.includes(6)
+            ? previous
+            : [...previous, 6]
+    );
+
+    setCurrentStep(7);
+};
+const handleAccountCreated = (result) => {
+    console.log("Student account created:", result);
+
+    // Account creation is the final step of this registration flow.
+    setCompletedSteps(previous =>
+        previous.includes(7)
+            ? previous
+            : [...previous, 7]
+    );
+};
     return (
         <div className="page2">
-
             {/* =========================================
                 HEADER
             ========================================= */}
@@ -266,20 +291,28 @@ function RegistrationPage2Layout() {
                     <div className="page2-form-area">
 
                         {currentStep === 5 && (
-                            <RegistrationPage2Review
-                                formData={formData}
-                                onChange={handleChange}
-                                onEditStep={handleStepClick}
-                                onConfirm={handleConfirmApplication}
-                            />
+                         <RegistrationPage2Review
+    formData={formData}
+    onChange={handleChange}
+    onEditStep={handleStepClick}
+    onConfirm={handleConfirmApplication}
+/>
                         )}
 
-                        {currentStep === 6 && (
-                            <RegistrationPaymentPage
-                                formData={formData}
-                                onBack={handleBackToReview}
-                            />
-                        )}
+                      {currentStep === 6 && (
+   <RegistrationPaymentPage
+    formData={formData}
+    onBack={handleBackToReview}
+    onPaymentSuccess={handlePaymentSuccess}
+/>
+)}
+{currentStep === 7 && (
+    <CreateAccount
+        studentId={paymentResult?.studentId}
+        email={formData.primaryEmail}
+        onAccountCreated={handleAccountCreated}
+    />
+)}
 
                         {CurrentComponent && (
                             <CurrentComponent
