@@ -2,14 +2,23 @@ function RegistrationPage2Progress({
     steps,
     currentStep,
     completedSteps,
-    onStepClick
+    onStepClick,
+    isPaymentCompleted
 }) {
+    const handleStepClick = (stepId) => {
+        if (isPaymentCompleted) {
+            return;
+        }
+
+        if (stepId >= 1 && stepId <= 5) {
+            onStepClick(stepId);
+        }
+    };
 
     return (
         <div className="page2-progress">
 
             <div className="page2-progress-line" />
-
 
             <div className="page2-progress-items">
 
@@ -22,8 +31,9 @@ function RegistrationPage2Progress({
                         currentStep === step.id;
 
                     const clickable =
-                        completed || current;
-
+                        !isPaymentCompleted &&
+                        step.id <= 5 &&
+                        (completed || current);
 
                     return (
                         <button
@@ -33,23 +43,19 @@ function RegistrationPage2Progress({
                                 page2-progress-item
                                 ${current ? "is-current" : ""}
                                 ${completed ? "is-completed" : ""}
+                                ${!clickable ? "is-locked" : ""}
                             `}
                             disabled={!clickable}
-                            onClick={() =>
-                                onStepClick(step.id)
-                            }
+                            onClick={() => handleStepClick(step.id)}
                         >
 
                             <span className="page2-progress-number">
-
                                 {completed ? (
                                     "✓"
                                 ) : (
                                     String(step.id).padStart(2, "0")
                                 )}
-
                             </span>
-
 
                             <span className="page2-progress-title">
                                 {step.shortTitle}
@@ -65,6 +71,5 @@ function RegistrationPage2Progress({
         </div>
     );
 }
-
 
 export default RegistrationPage2Progress;

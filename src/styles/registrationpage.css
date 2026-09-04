@@ -203,11 +203,11 @@
 
 .page2-progress-number {
     width: 28px;
-    height: 28px;
+    height: 28px; 
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
+   border-radius: 12px 4px 12px 4px;
     background: var(--white);
     border: 1.5px solid var(--line);
     font-family: var(--font-display);
@@ -216,6 +216,7 @@
     color: var(--ink-soft);
     transition: all 0.2s var(--ease);
 }
+
 
 .page2-progress-item.is-current .page2-progress-number {
     background: var(--brand);
@@ -417,6 +418,33 @@
     background: var(--brand-soft) !important;
 }
 
+.date-select-field {
+    position: relative;
+}
+
+.date-picker-wrapper {
+    width: 100%;
+    display: block;
+}
+
+.date-picker-input {
+    width: 100% !important;
+    cursor: pointer;
+    background-color: #fff !important;
+}
+
+#datepicker-portal {
+    position: relative;
+    z-index: 99999;
+}
+
+#datepicker-portal .react-datepicker-popper {
+    z-index: 99999 !important;
+}
+
+#datepicker-portal .react-datepicker {
+    z-index: 99999 !important;
+}
 /* =============================================================
    RADIO PILLS
    ============================================================= */
@@ -626,6 +654,28 @@
     flex-direction: column;
     gap: 8px;
 }
+.test-validation-error,
+.field-validation-error {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: #dc3545;
+    font-size: 13px;
+}
+
+.test-city-field {
+    min-width: 0;
+}
+
+.test-city-field small {
+    display: block;
+    margin-top: 5px;
+}
+
+.test-city-field .is-invalid {
+    border-color: #dc3545;
+}
 
 /* =============================================================
    DOCUMENT UPLOAD
@@ -710,7 +760,22 @@
     align-items: center;
     gap: 8px;
 }
+.selected-file-preview {
+    width: 70px;
+    height: 90px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #f5f5f5;
+    border: 1px solid #e1e4e8;
+}
 
+.selected-file-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
 .selected-file-info i {
     color: var(--success);
     font-size: 13px;
@@ -742,7 +807,17 @@
     background: var(--brand);
     color: var(--white);
 }
-
+.document-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    background: #fff1f1;
+    color: #dc2626;
+    font-size: 13px;
+}
 /* =============================================================
    DECLARATION
    ============================================================= */
@@ -1022,214 +1097,1647 @@
    PAYMENT — inline final wizard step
    ============================================================= */
 
-.payment-step {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
+/* =========================================================
+   PAYMENT PAGE
+========================================================= */
+
+.payment-page {
+    width: 100%;
+    padding: 4px 0 10px;
 }
 
-.payment-shell {
+.payment-layout {
     display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 14px;
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: 16px;
     align-items: start;
 }
 
-.payment-summary-card,
-.payment-form-card {
+
+/* =========================================================
+   LEFT - ORDER SUMMARY
+========================================================= */
+
+.payment-order {
     background: var(--white);
     border: 1px solid var(--line);
     border-radius: var(--radius-md);
-    padding: 15px;
+    padding: 18px;
 }
 
-.fee-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--line);
-    font-size: var(--fs-body);
-}
-
-.fee-line span:first-child {
-    color: var(--ink-soft);
-}
-
-.fee-line.fee-total {
-    border-bottom: none;
-    padding-top: 10px;
-    font-family: var(--font-display);
-    font-size: var(--fs-lg);
-    font-weight: 700;
-}
-
-.fee-total span:last-child {
-    color: var(--brand);
-}
-
-.applicant-strip {
+.payment-order-header {
     display: flex;
     align-items: center;
-    gap: 8px;
-    background: var(--paper);
-    border-radius: var(--radius-sm);
-    padding: 9px 11px;
-    margin-bottom: 12px;
+    gap: 11px;
+    margin-bottom: 16px;
 }
 
-.applicant-strip .avatar-dot {
-    width: 27px;
-    height: 27px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--white);
+.payment-order-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-display);
-    font-weight: 700;
-    font-size: var(--fs-body);
+
+    background: var(--accent-soft);
+    color: var(--accent);
+
+    font-size: 15px;
     flex-shrink: 0;
 }
 
-.applicant-strip strong {
-    display: block;
-    font-size: var(--fs-body);
+.payment-order-header h2 {
+    margin: 0;
+
+    font-family: var(--font-display);
+    font-size: var(--fs-lg);
+    font-weight: 700;
 }
 
-.applicant-strip small {
+.payment-order-header p {
+    margin: 2px 0 0;
+
     color: var(--ink-soft);
     font-size: var(--fs-xs);
 }
 
-.payment-card-mock {
-    position: relative;
-    height: 120px;
-    border-radius: var(--radius-md);
-    background: var(--ink);
-    color: var(--white);
-    padding: 14px;
+
+/* =========================================================
+   APPLICANT
+========================================================= */
+
+.payment-applicant {
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    margin-bottom: 14px;
-}
-
-.payment-card-mock .chip {
-    width: 25px;
-    height: 17px;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.3);
-}
-
-.payment-card-number {
-    font-family: var(--font-display);
-    font-size: var(--fs-lg);
-    letter-spacing: 0.08em;
-}
-
-.payment-card-meta {
-    display: flex;
-    justify-content: space-between;
-    font-size: var(--fs-xs);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    opacity: 0.85;
-}
-
-.payment-form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    align-items: center;
     gap: 10px;
-    margin-bottom: 10px;
-}
 
-.payment-form-row.full {
-    grid-template-columns: 1fr;
-}
-
-.pay-button {
-    width: 100%;
-    background: var(--brand);
-    color: var(--white);
-    border: none;
-    border-radius: var(--radius-sm);
     padding: 11px;
+
+    background: var(--paper);
+    border: 1px solid var(--line);
+
+    border-radius: var(--radius-sm);
+
+    margin-bottom: 17px;
+}
+
+.payment-avatar {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--accent);
+    color: var(--white);
+
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--fs-md);
-    cursor: pointer;
-    transition: all 0.15s var(--ease);
+    font-size: var(--fs-body);
+
+    flex-shrink: 0;
+}
+
+.payment-applicant strong {
+    display: block;
+
+    font-size: var(--fs-sm);
+    line-height: 1.3;
+}
+
+.payment-applicant span {
+    display: block;
+
+    color: var(--ink-soft);
+    font-size: var(--fs-xs);
+
     margin-top: 2px;
+
+    word-break: break-word;
 }
 
-.pay-button:hover:not(:disabled) {
-    background: var(--brand-dark);
+
+/* =========================================================
+   FEES
+========================================================= */
+
+.payment-fees {
+    display: flex;
+    flex-direction: column;
 }
 
-.pay-button:disabled {
+.payment-fee-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 10px 0;
+
+    border-bottom: 1px solid var(--line);
+
+    font-size: var(--fs-sm);
+}
+
+.payment-fee-row span {
+    color: var(--ink-soft);
+}
+
+.payment-fee-row strong {
+    color: var(--ink);
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   TOTAL
+========================================================= */
+
+.payment-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 15px 0 5px;
+
+    font-family: var(--font-display);
+}
+
+.payment-total span {
+    font-size: var(--fs-md);
+    font-weight: 700;
+}
+
+.payment-total strong {
+    color: var(--brand);
+
+    font-size: var(--fs-lg);
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   TRUST
+========================================================= */
+
+.payment-trust {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    margin-top: 18px;
+    padding: 11px;
+
+    background: var(--accent-soft);
+
+    border-radius: var(--radius-sm);
+
+    color: var(--accent);
+}
+
+.payment-trust > div {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: var(--white);
+
+    flex-shrink: 0;
+}
+
+.payment-trust span {
+    display: flex;
+    flex-direction: column;
+
+    font-size: var(--fs-xs);
+    font-weight: 700;
+}
+
+.payment-trust small {
+    margin-top: 2px;
+
+    color: var(--ink-soft);
+
+    font-size: 10px;
+    font-weight: 400;
+}
+
+
+/* =========================================================
+   BACK BUTTON
+========================================================= */
+
+.payment-back {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    margin-top: 12px;
+
+    padding: 10px;
+
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+
+    background: var(--white);
+    color: var(--ink);
+
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.15s var(--ease);
+}
+
+.payment-back:hover:not(:disabled) {
+    border-color: var(--brand);
+    color: var(--brand);
+    background: var(--paper);
+}
+
+.payment-back:disabled {
     opacity: 0.5;
     cursor: not-allowed;
 }
 
-.payment-secure-note {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    justify-content: center;
-    font-size: var(--fs-xs);
-    color: var(--ink-soft);
-    margin-top: 9px;
-}
 
-.payment-success {
-    max-width: 420px;
-    margin: 10px auto;
-    text-align: center;
+/* =========================================================
+   RIGHT - PAYMENT METHOD
+========================================================= */
+
+.payment-method-card {
     background: var(--white);
+
     border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    padding: 28px 22px;
+    border-radius: var(--radius-md);
+
+    padding: 18px;
 }
 
-.payment-success-stamp {
-    width: 52px;
-    height: 52px;
-    margin: 0 auto 14px;
-    border-radius: 50%;
-    background: var(--success);
-    color: var(--white);
+.payment-method-header {
     display: flex;
     align-items: center;
-    justify-content: center;
-    font-size: 20px;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
 }
 
-.payment-success h2 {
+.payment-method-header h2 {
+    margin: 0;
+
     font-family: var(--font-display);
-    font-size: var(--fs-xl);
+    font-size: var(--fs-lg);
     font-weight: 700;
-    margin-bottom: 6px;
 }
 
-.payment-success p {
+.payment-method-header p {
+    margin: 3px 0 0;
+
     color: var(--ink-soft);
-    font-size: var(--fs-body);
-    margin-bottom: 14px;
+    font-size: var(--fs-xs);
 }
 
-.payment-success .app-id {
-    display: inline-block;
+.payment-amount-badge {
+    padding: 7px 11px;
+
     background: var(--accent-soft);
     color: var(--accent);
-    padding: 5px 12px;
+
     border-radius: var(--radius-pill);
+
+    font-family: var(--font-display);
     font-size: var(--fs-sm);
     font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   PAYMENT TABS
+========================================================= */
+
+.payment-method-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 7px;
+
+    padding: 5px;
+
+    background: var(--paper);
+
+    border: 1px solid var(--line);
+
+    border-radius: 10px;
+
+    margin-bottom: 18px;
+}
+
+.payment-method-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 7px;
+
+    min-height: 42px;
+
+    border: none;
+    border-radius: 7px;
+
+    background: transparent;
+
+    color: var(--ink-soft);
+
+    font-family: var(--font-display);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.15s var(--ease);
+}
+
+.payment-method-tab i {
+    font-size: 13px;
+}
+
+.payment-method-tab:hover {
+    color: var(--brand);
+}
+
+.payment-method-tab.active {
+    background: var(--white);
+
+    color: var(--brand);
+
+    box-shadow:
+        0 2px 7px rgba(0, 0, 0, 0.07);
+}
+
+
+/* =========================================================
+   PAYMENT FORM
+========================================================= */
+
+.payment-form {
+    width: 100%;
+}
+
+
+/* =========================================================
+   PAYMENT FIELD
+========================================================= */
+
+.payment-field {
+    margin-bottom: 13px;
+}
+
+.payment-field label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    color: var(--ink);
+
+    font-size: var(--fs-xs);
+    font-weight: 700;
+}
+
+.payment-field label span {
+    color: var(--brand);
+
+    margin-left: 3px;
+}
+
+.payment-input {
+    width: 100%;
+
+    min-height: 42px;
+
+    padding: 9px 11px;
+
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+
+    background: var(--white);
+    color: var(--ink);
+
+    outline: none;
+
+    font-family: var(--font-body);
+    font-size: var(--fs-sm);
+
+    transition:
+        border-color 0.15s var(--ease),
+        box-shadow 0.15s var(--ease);
+}
+
+.payment-input::placeholder {
+    color: var(--ink-soft);
+    opacity: 0.6;
+}
+
+.payment-input:focus {
+    border-color: var(--brand);
+
+    box-shadow:
+        0 0 0 3px rgba(180, 0, 0, 0.07);
+}
+
+.payment-input.error {
+    border-color: var(--brand);
+}
+
+.payment-input:disabled {
+    background: var(--paper);
+    opacity: 0.7;
+}
+
+
+/* =========================================================
+   ERROR
+========================================================= */
+
+.payment-error {
+    display: block;
+
+    margin-top: 4px;
+
+    color: var(--brand);
+
+    font-size: 10px;
+    line-height: 1.3;
+}
+
+
+/* =========================================================
+   UPI
+========================================================= */
+
+.upi-payment,
+.netbanking-payment {
+    min-height: 280px;
+}
+
+.upi-heading {
+    display: flex;
+    align-items: center;
+
+    gap: 10px;
+
     margin-bottom: 16px;
 }
 
+.upi-icon {
+    width: 38px;
+    height: 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: var(--accent-soft);
+    color: var(--accent);
+
+    flex-shrink: 0;
+}
+
+.upi-heading h3 {
+    margin: 0;
+
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+    font-weight: 700;
+}
+
+.upi-heading p {
+    margin: 2px 0 0;
+
+    color: var(--ink-soft);
+    font-size: var(--fs-xs);
+}
+
+
+/* =========================================================
+   UPI APPS
+========================================================= */
+
+.upi-apps {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-bottom: 16px;
+}
+
+.upi-app {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    min-height: 78px;
+
+    padding: 8px;
+
+    background: var(--white);
+
+    border: 1px solid var(--line);
+
+    border-radius: var(--radius-sm);
+
+    color: var(--ink);
+
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.15s var(--ease);
+}
+
+.upi-app:hover {
+    border-color: var(--brand);
+}
+
+.upi-app.active {
+    border-color: var(--brand);
+
+    background: var(--accent-soft);
+
+    color: var(--brand);
+
+    box-shadow:
+        0 0 0 2px rgba(180, 0, 0, 0.06);
+}
+
+.upi-app-logo {
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 8px;
+
+    background: var(--paper);
+
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   OR
+========================================================= */
+
+.payment-or {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 14px 0;
+}
+
+.payment-or::before {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+
+    height: 1px;
+
+    background: var(--line);
+}
+
+.payment-or span {
+    position: relative;
+
+    padding: 0 10px;
+
+    background: var(--white);
+
+    color: var(--ink-soft);
+
+    font-size: 9px;
+    font-weight: 700;
+}
+
+
+/* =========================================================
+   UPI INPUT
+========================================================= */
+
+.upi-input-wrapper {
+    position: relative;
+}
+
+.upi-input-wrapper i {
+    position: absolute;
+
+    left: 12px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    color: var(--ink-soft);
+
+    font-size: 12px;
+}
+
+.upi-input-wrapper .payment-input {
+    padding-left: 32px;
+}
+
+
+/* =========================================================
+   UPI INFO
+========================================================= */
+
+.upi-info {
+    display: flex;
+    align-items: flex-start;
+
+    gap: 7px;
+
+    padding: 9px 10px;
+
+    border-radius: var(--radius-sm);
+
+    background: var(--paper);
+
+    color: var(--ink-soft);
+
+    font-size: 10px;
+
+    line-height: 1.4;
+}
+
+.upi-info i {
+    color: var(--accent);
+
+    margin-top: 1px;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.card-payment {
+    width: 100%;
+}
+
+.card-mini {
+    position: relative;
+
+    min-height: 135px;
+
+    margin-bottom: 16px;
+
+    padding: 15px;
+
+    border-radius: var(--radius-md);
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--ink),
+            #24212b
+        );
+
+    color: var(--white);
+
+    overflow: hidden;
+}
+
+.card-mini::after {
+    content: "";
+
+    position: absolute;
+
+    width: 150px;
+    height: 150px;
+
+    right: -50px;
+    bottom: -75px;
+
+    border-radius: 50%;
+
+    border: 25px solid rgba(255, 255, 255, 0.06);
+}
+
+.card-mini-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.card-mini-top i {
+    font-size: 22px;
+}
+
+.card-mini-number {
+    margin-top: 23px;
+
+    font-family: var(--font-display);
+
+    font-size: 17px;
+
+    letter-spacing: 0.08em;
+}
+
+.card-mini-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-top: 14px;
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    opacity: 0.85;
+}
+
+.card-mini-bottom span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   TWO COLUMNS
+========================================================= */
+
+.payment-two-columns {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 10px;
+}
+
+
+/* =========================================================
+   NET BANKING
+========================================================= */
+
+.bank-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 8px;
+
+    margin-top: 18px;
+}
+
+.bank-option {
+    min-height: 72px;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+
+    border: 1px solid var(--line);
+
+    border-radius: var(--radius-sm);
+
+    background: var(--white);
+
+    color: var(--ink);
+
+    font-size: var(--fs-xs);
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.15s var(--ease);
+}
+
+.bank-option i {
+    color: var(--accent);
+
+    font-size: 17px;
+}
+
+.bank-option:hover {
+    border-color: var(--brand);
+    color: var(--brand);
+
+    background: var(--paper);
+}
+
+.netbanking-note {
+    margin-top: 15px;
+
+    padding: 9px 10px;
+
+    background: var(--paper);
+
+    border-radius: var(--radius-sm);
+
+    color: var(--ink-soft);
+
+    font-size: 10px;
+
+    line-height: 1.4;
+}
+
+
+/* =========================================================
+   PAY BUTTON
+========================================================= */
+
+.payment-pay-button {
+    width: 100%;
+
+    min-height: 45px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 7px;
+
+    border: none;
+    border-radius: var(--radius-sm);
+
+    background: var(--brand);
+    color: var(--white);
+
+    font-family: var(--font-display);
+    font-size: var(--fs-md);
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s var(--ease),
+        transform 0.15s var(--ease),
+        opacity 0.15s var(--ease);
+}
+
+.payment-pay-button:hover:not(:disabled) {
+    background: var(--brand-dark);
+
+    transform: translateY(-1px);
+}
+
+.payment-pay-button:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.payment-pay-button:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   BOTTOM SECURITY
+========================================================= */
+
+.payment-bottom-note {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    gap: 5px;
+
+    margin-top: 10px;
+
+    color: var(--ink-soft);
+
+    font-size: 9px;
+}
+
+.payment-bottom-note i {
+    color: var(--accent);
+}
+
+.payment-dot {
+    opacity: 0.5;
+}
+
+
+/* =========================================================
+   SUCCESS
+========================================================= */
+
+.payment-success {
+    width: 100%;
+    max-width: 520px;
+
+    margin: 10px auto;
+
+    padding: 30px 25px;
+
+    text-align: center;
+
+    background: var(--white);
+
+    border: 1px solid var(--line);
+
+    border-radius: var(--radius-lg);
+}
+
+.payment-success-stamp {
+    width: 56px;
+    height: 56px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 0 auto 15px;
+
+    border-radius: 50%;
+
+    background: var(--success);
+
+    color: var(--white);
+
+    font-size: 22px;
+}
+
+.payment-success h2 {
+    margin: 0 0 7px;
+
+    font-family: var(--font-display);
+
+    font-size: var(--fs-xl);
+    font-weight: 700;
+}
+
+.payment-success p {
+    max-width: 420px;
+
+    margin: 0 auto 18px;
+
+    color: var(--ink-soft);
+
+    font-size: var(--fs-body);
+
+    line-height: 1.5;
+}
+
+.success-details {
+    display: flex;
+    flex-direction: column;
+
+    gap: 7px;
+
+    margin-bottom: 17px;
+}
+
+.success-detail {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding: 9px 11px;
+
+    background: var(--paper);
+
+    border-radius: var(--radius-sm);
+
+    text-align: left;
+}
+
+.success-detail span {
+    color: var(--ink-soft);
+
+    font-size: var(--fs-xs);
+}
+
+.success-detail strong {
+    color: var(--ink);
+
+    font-size: var(--fs-xs);
+}
+
+.success-email-message {
+    color: var(--ink-soft);
+
+    font-size: var(--fs-xs);
+
+    line-height: 1.5;
+}
+
+.success-email-message strong {
+    color: var(--ink);
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 991px) {
+
+    .payment-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .payment-order,
+    .payment-method-card {
+        width: 100%;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 767px) {
+
+    .payment-page {
+        padding: 0;
+    }
+
+    .payment-layout {
+        grid-template-columns: 1fr;
+
+        gap: 10px;
+    }
+
+    .payment-order,
+    .payment-method-card {
+        padding: 13px;
+
+        border-radius: var(--radius-sm);
+    }
+
+    .payment-method-header {
+        align-items: flex-start;
+    }
+
+    .payment-method-header h2 {
+        font-size: var(--fs-md);
+    }
+
+    .payment-amount-badge {
+        font-size: var(--fs-xs);
+
+        padding: 6px 9px;
+    }
+
+    .payment-method-tabs {
+        gap: 4px;
+    }
+
+    .payment-method-tab {
+        min-height: 40px;
+
+        gap: 4px;
+
+        font-size: 10px;
+    }
+
+    .payment-method-tab i {
+        font-size: 11px;
+    }
+
+    .upi-apps {
+        gap: 6px;
+    }
+
+    .upi-app {
+        min-height: 70px;
+
+        font-size: 9px;
+    }
+
+    .payment-two-columns {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .bank-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .payment-success {
+        padding: 24px 15px;
+    }
+
+}
+
+
+/* =========================================================
+   SMALL MOBILE
+========================================================= */
+
+@media (max-width: 400px) {
+
+    .payment-method-tab span {
+        font-size: 9px;
+    }
+
+    .payment-method-tab i {
+        display: none;
+    }
+
+    .payment-order-header h2 {
+        font-size: var(--fs-md);
+    }
+
+    .payment-total span {
+        font-size: var(--fs-sm);
+    }
+
+    .payment-total strong {
+        font-size: var(--fs-md);
+    }
+
+}
+/* =========================================
+   CREATE ACCOUNT
+========================================= */
+
+.account-step {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 20px 30px;
+    box-sizing: border-box;
+}
+
+.account-card {
+    width: 100%;
+    max-width: 470px;
+    background: #ffffff;
+    border: 1px solid #e1e4e8;
+    border-radius: 14px;
+    padding: 28px 30px 30px;
+    box-sizing: border-box;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+
+/* =========================================
+   HEADER
+========================================= */
+
+.account-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.account-icon {
+    width: 42px;
+    height: 42px;
+    margin: 0 auto 12px;
+    border-radius: 50%;
+    background: #fff0f0;
+    color: #b40000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.account-header h2 {
+    margin: 0 0 7px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #171717;
+}
+
+.account-header p {
+    max-width: 360px;
+    margin: 0 auto;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #6b7280;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.account-field {
+    width: 100%;
+    margin-bottom: 17px;
+}
+
+.account-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #171717;
+}
+
+.account-input {
+    display: block;
+    width: 100%;
+    height: 38px;
+    padding: 8px 11px;
+    box-sizing: border-box;
+
+    border: 1px solid #d5d9df;
+    border-radius: 6px;
+
+    background: #ffffff;
+    color: #171717;
+
+    font-size: 13px;
+    outline: none;
+
+    transition: border-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.account-input:focus {
+    border-color: #b40000;
+    box-shadow: 0 0 0 2px rgba(180, 0, 0, 0.08);
+}
+
+.account-input[readonly] {
+    background: #f7f7f8;
+    color: #444;
+    cursor: default;
+}
+
+
+/* =========================================
+   PASSWORD
+========================================= */
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-input {
+    padding-right: 40px;
+}
+
+.password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+
+    transform: translateY(-50%);
+
+    width: 28px;
+    height: 28px;
+
+    padding: 0;
+    border: 0;
+    background: transparent;
+
+    color: #777;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.password-toggle:hover {
+    color: #b40000;
+}
+
+
+/* =========================================
+   ERROR
+========================================= */
+
+.account-error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    margin: 4px 0 15px;
+    padding: 9px 11px;
+
+    border: 1px solid #f1c4c4;
+    border-radius: 6px;
+
+    background: #fff5f5;
+    color: #b40000;
+
+    font-size: 12px;
+}
+
+
+/* =========================================
+   BUTTON
+========================================= */
+
+.account-button {
+    width: 100%;
+    height: 38px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #c40000;
+    color: #ffffff;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease,
+                transform 0.1s ease;
+}
+
+.account-button:hover:not(:disabled) {
+    background: #a80000;
+}
+
+.account-button:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.account-button:disabled {
+    background: #d86c6c;
+    cursor: not-allowed;
+}
+
+
+/* =========================================
+   SUCCESS
+========================================= */
+
+/* =========================================
+   ACCOUNT SUCCESS
+========================================= */
+
+.account-success {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 42px 40px;
+}
+
+.account-success-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eaf8ef;
+    color: #198754;
+    font-size: 30px;
+    border: 6px solid #f3fbf6;
+}
+
+.account-success h2 {
+    margin: 0;
+    color: #171717;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.account-success-subtitle {
+    margin: 10px auto 28px;
+    max-width: 480px;
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+
+/* =========================================
+   CREDENTIAL CARD
+========================================= */
+
+.account-credentials {
+    text-align: left;
+    border: 1px solid #e1e4e8;
+    border-radius: 14px;
+    background: #ffffff;
+    overflow: hidden;
+    margin-bottom: 18px;
+}
+
+.credential-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 18px 20px;
+    background: #fff7f7;
+    border-bottom: 1px solid #f0dede;
+}
+
+.credential-header > i {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #b40000;
+    color: #ffffff;
+    font-size: 17px;
+}
+
+.credential-header h3 {
+    margin: 0 0 3px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #171717;
+}
+
+.credential-header span {
+    display: block;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+
+/* =========================================
+   CREDENTIAL ROW
+========================================= */
+
+.credential-row {
+    min-height: 62px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    border-bottom: 1px solid #eef0f2;
+}
+
+.credential-row:last-child {
+    border-bottom: none;
+}
+
+.credential-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #6b7280;
+    font-size: 13px;
+}
+
+.credential-label i {
+    width: 28px;
+    text-align: center;
+    color: #b40000;
+    font-size: 14px;
+}
+
+.credential-row strong {
+    color: #171717;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: right;
+    word-break: break-word;
+}
+
+.masked-password {
+    letter-spacing: 3px;
+    color: #6b7280 !important;
+}
+
+
+/* =========================================
+   INFORMATION MESSAGE
+========================================= */
+
+.account-login-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+    padding: 13px 15px;
+    margin-bottom: 22px;
+    border-radius: 10px;
+    background: #f5f8fc;
+    border: 1px solid #e1e7ef;
+    color: #5f6b7a;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.account-login-note i {
+    color: #1769aa;
+    margin-top: 2px;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+
+/* =========================================
+   LOGIN BUTTON
+========================================= */
+
+.account-login-button {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.account-login-button i {
+    font-size: 13px;
+    transition: transform 0.2s ease;
+}
+
+.account-login-button:hover i {
+    transform: translateX(4px);
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 576px) {
+
+    .account-step {
+        padding: 15px 10px 25px;
+    }
+
+    .account-card {
+        max-width: 100%;
+        padding: 24px 20px 25px;
+        border-radius: 10px;
+    }
+
+    .account-header h2 {
+        font-size: 18px;
+    }
+
+    .account-header p {
+        font-size: 12px;
+    }
+
+    .account-field {
+        margin-bottom: 15px;
+    }
+
+    .account-input,
+    .account-button {
+        height: 40px;
+    }
+
+}
 /* =============================================================
    RESPONSIVE
    ============================================================= */

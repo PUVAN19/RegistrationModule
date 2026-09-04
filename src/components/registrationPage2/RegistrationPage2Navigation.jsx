@@ -2,7 +2,8 @@ function RegistrationPage2Navigation({
     currentStep,
     totalSteps,
     onPrevious,
-    onNext
+    onNext,
+    isPaymentCompleted
 }) {
 
     const isFirst =
@@ -11,6 +12,8 @@ function RegistrationPage2Navigation({
     const isLast =
         currentStep === totalSteps;
 
+    const previousDisabled =
+        isFirst || isPaymentCompleted;
 
     return (
         <div className="page2-navigation">
@@ -19,7 +22,7 @@ function RegistrationPage2Navigation({
                 type="button"
                 className="page2-back-button"
                 onClick={onPrevious}
-                disabled={isFirst}
+                disabled={previousDisabled}
             >
                 <span>
                     ←
@@ -27,7 +30,6 @@ function RegistrationPage2Navigation({
 
                 Back
             </button>
-
 
             <div className="page2-navigation-meta">
 
@@ -43,14 +45,12 @@ function RegistrationPage2Navigation({
 
             </div>
 
-
             <button
                 type="button"
                 className="page2-continue-button"
                 onClick={onNext}
                 disabled={isLast}
             >
-
                 {isLast
                     ? "Review"
                     : "Continue"
@@ -65,6 +65,5 @@ function RegistrationPage2Navigation({
         </div>
     );
 }
-
 
 export default RegistrationPage2Navigation;

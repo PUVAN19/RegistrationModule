@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 const documentTypes = [
     {
@@ -10,31 +10,87 @@ const documentTypes = [
     }
 ];
 
-function DocumentUpload({ formData, onChange }) {
+function DocumentUpload({
+    formData,
+    onChange,
+    validationErrors = {}
+}) {
     const fileInputRefs = useRef({});
+    const [preview, setPreview] = useState(null);
 
-    const handleFileChange = (event, documentKey) => {
-        const file = event.target.files?.[0];
+   const handleFileChange = (event, documentKey) => {
+    const file = event.target.files?.[0];
 
-        if (!file) {
-            return;
-        }
+    if (!file) {
+        return;
+    }
 
+    const allowedTypes = [
+        "image/jpeg",
+        "image/png"
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
         onChange({
             target: {
-                name: documentKey,
-                value: file
+                name: "document",
+                value: "Only JPG and PNG images are allowed."
             }
         });
-    };
+
+        event.target.value = "";
+        return;
+    }
+
+    const maxSize = 2 * 1024 * 1024;
+
+    if (file.size > maxSize) {
+        onChange({
+            target: {
+                name: "document",
+                value: "Photograph size must not exceed 2 MB."
+            }
+        });
+
+        event.target.value = "";
+        return;
+    }
+
+    onChange({
+        target: {
+            name: "document",
+            value: ""
+        }
+    });
+
+    onChange({
+        target: {
+            name: documentKey,
+            value: file
+        }
+    });
+
+    const previewUrl = URL.createObjectURL(file);
+    setPreview(previewUrl);
+};
 
     const removeFile = (documentKey) => {
+
         onChange({
             target: {
                 name: documentKey,
                 value: null
             }
         });
+
+        onChange({
+            target: {
+                name: "documentValidationError",
+                value: ""
+            }
+        });
+
+        setPreview(null);
 
         if (fileInputRefs.current[documentKey]) {
             fileInputRefs.current[documentKey].value = "";
@@ -44,6 +100,8 @@ function DocumentUpload({ formData, onChange }) {
     return (
         <section className="registration-section">
 
+            {/* HEADER */}
+
             <div className="section-header">
 
                 <div className="section-icon">
@@ -52,6 +110,7 @@ function DocumentUpload({ formData, onChange }) {
 
                 <div>
                     <h2>Upload Documents</h2>
+
                     <p>
                         Upload the required documents in the specified format.
                     </p>
@@ -61,11 +120,15 @@ function DocumentUpload({ formData, onChange }) {
 
             <div className="section-divider"></div>
 
+
+            {/* DOCUMENTS */}
+
             <div className="form-grid">
 
                 {documentTypes.map((document) => {
 
-                    const selectedFile = formData[document.key];
+                    const selectedFile =
+                        formData[document.key];
 
                     return (
                         <div
@@ -75,10 +138,14 @@ function DocumentUpload({ formData, onChange }) {
 
                             <div className="document-upload-card">
 
+                                {/* DOCUMENT HEADER */}
+
                                 <div className="document-upload-header">
 
                                     <div>
+
                                         <div className="document-title">
+
                                             {document.label}
 
                                             {document.required && (
@@ -86,18 +153,35 @@ function DocumentUpload({ formData, onChange }) {
                                                     *
                                                 </span>
                                             )}
+
                                         </div>
 
                                         <div className="document-description">
                                             {document.description}
                                         </div>
+
                                     </div>
 
                                     <i className="fa-regular fa-file"></i>
 
                                 </div>
 
+
+                                {/* ERROR */}
+
+                                {validationErrors.document && (
+                                    <div className="document-error">
+                                        <i className="fa-solid fa-circle-exclamation"></i>
+
+                                        {validationErrors.document}
+                                    </div>
+                                )}
+
+
+                                {/* SELECT FILE */}
+
                                 {!selectedFile ? (
+
                                     <label className="document-upload-area">
 
                                         <i className="fa-solid fa-cloud-arrow-up"></i>
@@ -107,7 +191,7 @@ function DocumentUpload({ formData, onChange }) {
                                         </span>
 
                                         <small>
-                                            Supported files as specified above
+                                            JPG or PNG • Maximum 2 MB
                                         </small>
 
                                         <input
@@ -128,29 +212,53 @@ function DocumentUpload({ formData, onChange }) {
                                         />
 
                                     </label>
+
                                 ) : (
+
                                     <div className="selected-file">
+
+                                        {/* PREVIEW */}
+
+                                        <div className="selected-file-preview">
+
+                                            {preview ? (
+                                                <img
+                                                    src={preview}
+                                                    alt="Selected photograph"
+                                                />
+                                            ) : (
+                                                <i className="fa-solid fa-image"></i>
+                                            )}
+
+                                        </div>
+
+
+                                        {/* FILE INFORMATION */}
 
                                         <div className="selected-file-info">
 
-                                            <i className="fa-solid fa-file"></i>
+                                            <strong>
+                                                {selectedFile.name}
+                                            </strong>
 
-                                            <div>
-                                                <strong>
-                                                    {selectedFile.name}
-                                                </strong>
+                                            <small>
+                                                {(
+                                                    selectedFile.size /
+                                                    1024 /
+                                                    1024
+                                                ).toFixed(2)}{" "}
+                                                MB
+                                            </small>
 
-                                                <small>
-                                                    {(
-                                                        selectedFile.size /
-                                                        1024 /
-                                                        1024
-                                                    ).toFixed(2)}{" "}
-                                                    MB
-                                                </small>
-                                            </div>
+                                            <small className="file-success">
+                                                <i className="fa-solid fa-circle-check"></i>
+                                                File selected
+                                            </small>
 
                                         </div>
+
+
+                                        {/* REMOVE */}
 
                                         <button
                                             type="button"
@@ -164,6 +272,7 @@ function DocumentUpload({ formData, onChange }) {
                                         </button>
 
                                     </div>
+
                                 )}
 
                             </div>

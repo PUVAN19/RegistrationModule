@@ -7,7 +7,13 @@ const cityOptions = [
     { value: "chennai", label: "Chennai" }
 ];
 
-function TestDetails({ formData, onChange }) {
+
+function TestDetails({
+    formData,
+    onChange,
+    validationErrors = {}
+}) {
+
     return (
         <section className="registration-section">
 
@@ -23,7 +29,9 @@ function TestDetails({ formData, onChange }) {
 
                 <div>
                     <h2>Test Dates</h2>
-                    <p>Select the test date(s) you wish to appear for.</p>
+                    <p>
+                        Select the test date(s) you wish to appear for.
+                    </p>
                 </div>
 
             </div>
@@ -38,8 +46,9 @@ function TestDetails({ formData, onChange }) {
 
             <div className="test-date-columns">
 
+
                 {/* =====================================
-                    TEST 1 - LEFT COLUMN
+                    TEST 1
                 ===================================== */}
 
                 <div className="test-date-column">
@@ -64,23 +73,32 @@ function TestDetails({ formData, onChange }) {
                     </label>
 
 
-                    {/* TEST 1 DETAILS — smoothly expands / shrinks */}
+                    {/* TEST 1 DETAILS */}
 
-                    <div className={`test-details-accordion ${formData.testDate1 ? "is-open" : ""}`}>
+                    <div
+                        className={`test-details-accordion ${
+                            formData.testDate1 ? "is-open" : ""
+                        }`}
+                    >
+
                         <div className="test-details-accordion-inner">
+
                             <TestDetailsCard
                                 prefix="test1"
                                 formData={formData}
                                 onChange={onChange}
+                                validationErrors={validationErrors}
                             />
+
                         </div>
+
                     </div>
 
                 </div>
 
 
                 {/* =====================================
-                    TEST 2 - RIGHT COLUMN
+                    TEST 2
                 ===================================== */}
 
                 <div className="test-date-column">
@@ -105,21 +123,45 @@ function TestDetails({ formData, onChange }) {
                     </label>
 
 
-                    {/* TEST 2 DETAILS — smoothly expands / shrinks */}
+                    {/* TEST 2 DETAILS */}
 
-                    <div className={`test-details-accordion ${formData.testDate2 ? "is-open" : ""}`}>
+                    <div
+                        className={`test-details-accordion ${
+                            formData.testDate2 ? "is-open" : ""
+                        }`}
+                    >
+
                         <div className="test-details-accordion-inner">
+
                             <TestDetailsCard
                                 prefix="test2"
                                 formData={formData}
                                 onChange={onChange}
+                                validationErrors={validationErrors}
                             />
+
                         </div>
+
                     </div>
 
                 </div>
 
             </div>
+
+
+            {/* =========================================
+                TEST DATE ERROR
+            ========================================= */}
+
+            {validationErrors.testDate && (
+                <div className="test-validation-error">
+                    <i className="fa-solid fa-circle-exclamation"></i>
+
+                    <span>
+                        {validationErrors.testDate}
+                    </span>
+                </div>
+            )}
 
         </section>
     );
@@ -133,18 +175,24 @@ function TestDetails({ formData, onChange }) {
 function TestDetailsCard({
     prefix,
     formData,
-    onChange
+    onChange,
+    validationErrors = {}
 }) {
 
-    const setChecked = formData[`${prefix}Set`] || false;
-    const sieteeChecked = formData[`${prefix}Sietee`] || false;
+    const setChecked =
+        formData[`${prefix}Set`] || false;
+
+    const sieteeChecked =
+        formData[`${prefix}Sietee`] || false;
+
 
     return (
 
         <div className="test-details-card">
 
+
             {/* =========================================
-                SET / SITEEE
+                CHOOSE EXAMINATION
             ========================================= */}
 
             <div>
@@ -153,13 +201,22 @@ function TestDetailsCard({
                     Choose Examination
                 </div>
 
+
                 <div className="test-examination-row">
 
-                    {/* SET */}
 
-                    <label className={`check-control test-exam-pill ${setChecked ? "is-checked" : ""}`}>
+                    {/* =================================
+                        SET
+                    ================================= */}
+
+                    <label
+                        className={`check-control test-exam-pill ${
+                            setChecked ? "is-checked" : ""
+                        }`}
+                    >
 
                         <span className="test-exam-pill-left">
+
                             <input
                                 type="checkbox"
                                 name={`${prefix}Set`}
@@ -171,8 +228,12 @@ function TestDetailsCard({
                                 <i className="fa-solid fa-check"></i>
                             </span>
 
-                            <span className="test-exam-pill-name">SET</span>
+                            <span className="test-exam-pill-name">
+                                SET
+                            </span>
+
                         </span>
+
 
                         <span className="test-exam-pill-time">
                             09:00 am – 10:00 am
@@ -181,11 +242,18 @@ function TestDetailsCard({
                     </label>
 
 
-                    {/* SITEEE */}
+                    {/* =================================
+                        SITEEE
+                    ================================= */}
 
-                    <label className={`check-control test-exam-pill ${sieteeChecked ? "is-checked" : ""}`}>
+                    <label
+                        className={`check-control test-exam-pill ${
+                            sieteeChecked ? "is-checked" : ""
+                        }`}
+                    >
 
                         <span className="test-exam-pill-left">
+
                             <input
                                 type="checkbox"
                                 name={`${prefix}Sietee`}
@@ -197,8 +265,12 @@ function TestDetailsCard({
                                 <i className="fa-solid fa-check"></i>
                             </span>
 
-                            <span className="test-exam-pill-name">SITEEE</span>
+                            <span className="test-exam-pill-name">
+                                SITEEE
+                            </span>
+
                         </span>
+
 
                         <span className="test-exam-pill-time">
                             11:30 am – 12:30 pm
@@ -207,6 +279,19 @@ function TestDetailsCard({
                     </label>
 
                 </div>
+
+
+                {/* EXAMINATION ERROR */}
+
+                {validationErrors[`${prefix}Set`] && (
+                    <div className="field-validation-error">
+                        <i className="fa-solid fa-circle-exclamation"></i>
+
+                        <span>
+                            {validationErrors[`${prefix}Set`]}
+                        </span>
+                    </div>
+                )}
 
             </div>
 
@@ -224,50 +309,137 @@ function TestDetailsCard({
 
                 <div className="test-city-grid">
 
-                    <select
-                        name={`${prefix}City1`}
-                        className="form-select"
-                        value={formData[`${prefix}City1`] || ""}
-                        onChange={onChange}
-                        required
-                    >
-                        <option value="" disabled>Test City 1</option>
-                        {cityOptions.map((city) => (
-                            <option key={city.value} value={city.value}>
-                                {city.label}
-                            </option>
-                        ))}
-                    </select>
 
-                    <select
-                        name={`${prefix}City2`}
-                        className="form-select"
-                        value={formData[`${prefix}City2`] || ""}
-                        onChange={onChange}
-                        required
-                    >
-                        <option value="" disabled>Test City 2</option>
-                        {cityOptions.map((city) => (
-                            <option key={city.value} value={city.value}>
-                                {city.label}
-                            </option>
-                        ))}
-                    </select>
+                    {/* =================================
+                        CITY 1
+                    ================================= */}
 
-                    <select
-                        name={`${prefix}City3`}
-                        className="form-select"
-                        value={formData[`${prefix}City3`] || ""}
-                        onChange={onChange}
-                        required
-                    >
-                        <option value="" disabled>Test City 3</option>
-                        {cityOptions.map((city) => (
-                            <option key={city.value} value={city.value}>
-                                {city.label}
+                    <div className="test-city-field">
+
+                        <select
+                            name={`${prefix}City1`}
+                            className={`form-select ${
+                                validationErrors[`${prefix}City1`]
+                                    ? "is-invalid"
+                                    : ""
+                            }`}
+                            value={
+                                formData[`${prefix}City1`] || ""
+                            }
+                            onChange={onChange}
+                        >
+
+                            <option value="">
+                                Test City 1
                             </option>
-                        ))}
-                    </select>
+
+                            {cityOptions.map((city) => (
+                                <option
+                                    key={city.value}
+                                    value={city.value}
+                                >
+                                    {city.label}
+                                </option>
+                            ))}
+
+                        </select>
+
+
+                        {validationErrors[`${prefix}City1`] && (
+                            <small className="text-danger">
+                                {validationErrors[`${prefix}City1`]}
+                            </small>
+                        )}
+
+                    </div>
+
+
+                    {/* =================================
+                        CITY 2
+                    ================================= */}
+
+                    <div className="test-city-field">
+
+                        <select
+                            name={`${prefix}City2`}
+                            className={`form-select ${
+                                validationErrors[`${prefix}City2`]
+                                    ? "is-invalid"
+                                    : ""
+                            }`}
+                            value={
+                                formData[`${prefix}City2`] || ""
+                            }
+                            onChange={onChange}
+                        >
+
+                            <option value="">
+                                Test City 2
+                            </option>
+
+                            {cityOptions.map((city) => (
+                                <option
+                                    key={city.value}
+                                    value={city.value}
+                                >
+                                    {city.label}
+                                </option>
+                            ))}
+
+                        </select>
+
+
+                        {validationErrors[`${prefix}City2`] && (
+                            <small className="text-danger">
+                                {validationErrors[`${prefix}City2`]}
+                            </small>
+                        )}
+
+                    </div>
+
+
+                    {/* =================================
+                        CITY 3
+                    ================================= */}
+
+                    <div className="test-city-field">
+
+                        <select
+                            name={`${prefix}City3`}
+                            className={`form-select ${
+                                validationErrors[`${prefix}City3`]
+                                    ? "is-invalid"
+                                    : ""
+                            }`}
+                            value={
+                                formData[`${prefix}City3`] || ""
+                            }
+                            onChange={onChange}
+                        >
+
+                            <option value="">
+                                Test City 3
+                            </option>
+
+                            {cityOptions.map((city) => (
+                                <option
+                                    key={city.value}
+                                    value={city.value}
+                                >
+                                    {city.label}
+                                </option>
+                            ))}
+
+                        </select>
+
+
+                        {validationErrors[`${prefix}City3`] && (
+                            <small className="text-danger">
+                                {validationErrors[`${prefix}City3`]}
+                            </small>
+                        )}
+
+                    </div>
 
                 </div>
 
@@ -276,5 +448,6 @@ function TestDetailsCard({
         </div>
     );
 }
+
 
 export default TestDetails;

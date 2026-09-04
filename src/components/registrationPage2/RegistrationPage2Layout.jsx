@@ -41,7 +41,7 @@ const registrationSteps = [
     {
         id: 4,
         key: "documents",
-        shortTitle: "Docs",
+        shortTitle: "Photo",
         component: DocumentUpload
     },
     {
@@ -70,7 +70,8 @@ function RegistrationPage2Layout() {
     const [currentStep, setCurrentStep] = useState(1);
 
     const [completedSteps, setCompletedSteps] = useState([]);
-const [paymentResult, setPaymentResult] = useState(null);
+    const [paymentResult, setPaymentResult] = useState(null);
+    const [isPaymentCompleted, setIsPaymentCompleted] = useState(false);
     const [formData, setFormData] = useState({
         applicantName: "",
         dateOfBirth: null,
@@ -83,8 +84,8 @@ const [paymentResult, setPaymentResult] = useState(null);
         primaryEmail: "",
         confirmEmail: "",
         isNri: "no",
+        nriAdmission: "",
         nationality: "",
-
         testDate1: false,
         testDate2: false,
 
@@ -101,68 +102,293 @@ const [paymentResult, setPaymentResult] = useState(null);
         test2City3: "",
 
         photo: null,
-        signature: null,
-        idProof: null,
-        academicCertificate: null,
-
+        documentValidationError: "",
         declarationAccepted: false
     });
 
+const [validationErrors, setValidationErrors] = useState({});
+const handleChange = (event) => { 
+    const {name,  value,  type,  checked  } = event.target;
 
-const handleChange = (event) => {
+    const newValue =  type === "checkbox"  ? checked  : value;
 
-        const {
-            name,
-            value,
-            type,
-            checked
-        } = event.target;
+    setFormData((previous) => ({  ...previous,  [name]: newValue   }));
 
-        setFormData((previous) => ({
-            ...previous,
-            [name]: type === "checkbox"
-                ? checked
-                : value
-        }));
-    };
+    setValidationErrors((previous) => { 
+        const updated = {  ...previous   };
 
-
-    const handleNext = () => {
-
-        if (currentStep >= registrationSteps.length) {
-            return;
+        delete updated[name]; 
+        if (name === "photo") {
+            delete updated.document;
         }
 
-        setCompletedSteps((previous) => {
+        return updated;
+    });
+};
+const validateStep = () => {
+    const errors = {};
 
-            if (previous.includes(currentStep)) {
-                return previous;
+    // ==========================================
+    // STEP 1 - PERSONAL INFORMATION
+    // ==========================================
+    if (currentStep === 1) {
+
+        const name = formData.applicantName?.trim();
+
+        if (!name) {
+            errors.applicantName = "Applicant Name is required.";
+        }
+        else if (name.length < 2) {
+            errors.applicantName = "Applicant Name must contain at least 2 characters.";
+        }
+        else if (name.length > 100) {
+            errors.applicantName =  "Applicant Name cannot exceed 100 characters.";
+        }
+        else if (!/^[a-zA-Z]+(?:\s[a-zA-Z]+)*$/.test(name)) {
+            errors.applicantName = "Applicant Name can contain letters and spaces only.";
+        }
+
+        // Date of Birth
+        if (!formData.dateOfBirth) {
+            errors.dateOfBirth = "Date of Birth is required.";
+        }
+        else {
+            const dob = new Date(formData.dateOfBirth);
+            const today = new Date();
+
+            today.setHours(0, 0, 0, 0);
+            dob.setHours(0, 0, 0, 0);
+
+            if (isNaN(dob.getTime())) {
+                errors.dateOfBirth = "Please select a valid date.";
             }
-
-            return [
-                ...previous,
-                currentStep
-            ];
-        });
-
-        setCurrentStep((previous) => previous + 1);
-    };
-
-
-    const handlePrevious = () => {
-
-        if (currentStep > 1) {
-            setCurrentStep((previous) => previous - 1);
+            else if (dob > today) {
+                errors.dateOfBirth =
+                    "Date of Birth cannot be a future date.";
+            }
         }
-    };
+
+        // Gender
+        if (!formData.gender) {
+            errors.gender = "Please select Gender.";
+        }
+
+        // Category
+        if (!formData.category) {
+            errors.category = "Please select Category.";
+        }
+
+        // PwD
+        if (!formData.pwdStatus) {
+            errors.pwdStatus = "Please select PwD status.";
+        }
+    }
+
+    // ==========================================
+    // STEP 2 - CONTACT INFORMATION
+    // ==========================================
+    if (currentStep === 2) {
+
+        // Mobile
+        const mobile = formData.mobileNumber?.trim();
+
+        if (!mobile) {
+            errors.mobileNumber = "Mobile Number is required.";
+        }
+        else if (!/^[0-9]+$/.test(mobile)) {
+            errors.mobileNumber = "Mobile Number must contain numbers only.";
+        }
+        else if (mobile.length !== 10) {
+            errors.mobileNumber = "Mobile Number must contain exactly 10 digits.";
+        }
+
+        // Email
+        const email = formData.primaryEmail?.trim();
+
+        if (!email) {
+            errors.primaryEmail = "Primary Email is required.";
+        }
+        else if (  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)  ) {
+            errors.primaryEmail = "Please enter a valid email address.";
+        }
+
+        // Confirm Email
+        const confirmEmail = formData.confirmEmail?.trim();
+
+        if (!confirmEmail) {
+            errors.confirmEmail =  "Please retype your email address.";
+        }
+        else if (email !== confirmEmail) {
+            errors.confirmEmail =  "Email addresses do not match.";
+        }
+
+        // Nationality
+        if (!formData.nationality) {
+            errors.nationality = "Please select Nationality.";
+        }
+
+        // NRI
+        if (!formData.isNri) {
+            errors.isNri =  "Please select whether you are an NRI candidate.";
+        }
+
+        // NRI Admission
+        if (formData.isNri === "yes" &&  !formData.nriAdmission ) {
+            errors.nriAdmission =  "Please select NRI admission preference.";
+        }
+    }
+ 
+   if (currentStep === 3) { 
+    // --------------------------------------
+    // At least one test date
+    // --------------------------------------
+
+    if (!formData.testDate1 && !formData.testDate2) {
+        errors.testDate = "Please select at least one test date.";
+    }
 
 
-    const handleStepClick = (stepNumber) => {
+    // ======================================
+    // TEST 1
+    // ======================================
 
-        if (
-            stepNumber === currentStep ||
-            completedSteps.includes(stepNumber)
-        ) {
+    if (formData.testDate1) {
+
+        const test1Set = formData.test1Set;
+        const test1Sietee = formData.test1Sietee; 
+        const city1 = formData.test1City1;
+        const city2 = formData.test1City2;
+        const city3 = formData.test1City3;
+ 
+        // Examination
+        if (!test1Set && !test1Sietee) {
+            errors.test1Set = "Please select SET or SITEEE.";
+        } 
+        // City 1
+        if (!city1) {
+            errors.test1City1 = "Please select Test City 1.";
+        } 
+        // City 2
+        if (!city2) {
+            errors.test1City2 = "Please select Test City 2.";
+        } 
+        // City 3
+        if (!city3) {
+            errors.test1City3 = "Please select Test City 3.";
+        } 
+        // Duplicate cities
+        if ( city1 &&  city2 && city1 === city2 ) {
+            errors.test1City2 = "Test City 2 must be different from Test City 1.";
+        } 
+        if (city1 &&  city3 && city1 === city3 ) {
+            errors.test1City3 =  "Test City 3 must be different from Test City 1.";
+        } 
+        if (city2 &&  city3 &&  city2 === city3  ) {
+            errors.test1City3 = "Test City 3 must be different from Test City 2.";
+        }
+    }
+
+    // ======================================
+    // TEST 2
+    // ======================================
+
+    if (formData.testDate2) {
+
+        const test2Set = formData.test2Set;
+        const test2Sietee = formData.test2Sietee; 
+        const city1 = formData.test2City1;
+        const city2 = formData.test2City2;
+        const city3 = formData.test2City3;
+ 
+        // Examination
+        if (!test2Set && !test2Sietee) {
+            errors.test2Set = "Please select SET or SITEEE.";
+        } 
+        // City 1
+        if (!city1) {
+            errors.test2City1 =  "Please select Test City 1.";
+        }
+      // City 2
+        if (!city2) {
+            errors.test2City2 =  "Please select Test City 2.";
+        }  
+        // City 3
+        if (!city3) {
+            errors.test2City3 = "Please select Test City 3.";
+        } 
+        // Duplicate cities
+        if (city1 &&  city2 && city1 === city2 ) {
+            errors.test2City2 =  "Test City 2 must be different from Test City 1.";
+        } 
+        if (city1 &&  city3 && city1 === city3  ) {
+            errors.test2City3 = "Test City 3 must be different from Test City 1.";
+        } 
+        if ( city2 && city3 && city2 === city3  ) {
+            errors.test2City3 = "Test City 3 must be different from Test City 2.";
+        }
+    }
+}
+
+    // ==========================================
+    // STEP 4 - DOCUMENT UPLOAD
+    // ==========================================
+   if (currentStep === 4) {
+
+    if (!formData.photo) {
+        errors.document =  "Please upload your passport size photograph.";
+    }
+    else { 
+        const allowedTypes = [  "image/jpeg",  "image/png"  ];
+
+        if (!allowedTypes.includes(formData.photo.type)) {
+            errors.document =  "Only JPG and PNG images are allowed.";
+        }
+        else if (formData.photo.size > 2 * 1024 * 1024  ) {
+            errors.document =  "Photograph size must not exceed 2 MB.";
+        }
+    }
+} 
+    return errors;
+};
+const handleNext = () => { 
+    // Validate current step first
+    const errors = validateStep();
+
+    // If validation errors exist, stay on current step
+    if (Object.keys(errors).length > 0) {
+        setValidationErrors(errors);
+        return;
+    }
+
+    // Clear errors
+    setValidationErrors({});
+
+    // Mark current step as completed
+    setCompletedSteps((previous) => {
+        if (previous.includes(currentStep)) {
+            return previous;
+        }
+
+        return [...previous, currentStep];
+    });
+
+    // Move to next step
+    if (currentStep < 5) {
+        setCurrentStep((previous) => previous + 1);
+    }
+};
+
+  const handlePrevious = () => { 
+    if (isPaymentCompleted) {
+        return;
+    } 
+    if (currentStep > 1) {
+        setCurrentStep(currentStep - 1);
+    }
+};
+
+    const handleStepClick = (stepNumber) => { 
+        if (stepNumber === currentStep || completedSteps.includes(stepNumber)  ) {
             setCurrentStep(stepNumber);
         }
     };
@@ -171,182 +397,135 @@ const handleChange = (event) => {
     // Review's own "Confirm & Proceed to Payment" button advances
     // to the Payment step, same as handleNext, but always from
     // step 5 regardless of where it's called from.
- const handleConfirmApplication = () => {
-    setCompletedSteps((previous) =>
-        previous.includes(5)
-            ? previous
-            : [...previous, 5]
-    );
 
+const handleConfirmApplication = () => {
+    setCompletedSteps(previous =>
+        previous.includes(5)  ? previous  : [...previous, 5]
+    ); 
     setCurrentStep(6);
 };
     const handleBackToReview = () => {
         setCurrentStep(5);
     };
-
-
-    const currentStepConfig =
-        registrationSteps.find(
-            (step) => step.id === currentStep
-        );
-
-
-    const CurrentComponent =
-        currentStepConfig?.component;
-
+ 
+    const currentStepConfig = registrationSteps.find((step) => step.id === currentStep  );  
+    const CurrentComponent = currentStepConfig?.component; 
     // Steps 5 (Review) and 6 (Payment) have their own in-page
     // actions, so the shared Back/Continue footer only applies
     // to the four form steps.
     const showSharedNavigation = currentStep <= 4;
+ 
+const handlePaymentSuccess = (paymentResult) => {
 
-
-
-const handlePaymentSuccess = (result) => {
-    setPaymentResult(result);
+    console.log("Payment successful:", paymentResult);
+    setPaymentResult(paymentResult);
+    setIsPaymentCompleted(true);
     setCompletedSteps(previous =>
-        previous.includes(6)
-            ? previous
-            : [...previous, 6]
-    );
-
+        previous.includes(6)  ? previous  : [...previous, 6]
+    ); 
     setCurrentStep(7);
 };
 const handleAccountCreated = (result) => {
-    console.log("Student account created:", result);
-
+    console.log("Student account created:", result); 
     // Account creation is the final step of this registration flow.
     setCompletedSteps(previous =>
-        previous.includes(7)
-            ? previous
-            : [...previous, 7]
+        previous.includes(7)  ? previous  : [...previous, 7]
     );
 };
     return (
-        <div className="page2">
-            {/* =========================================
-                HEADER
-            ========================================= */}
+      <div className="page2">
+        {/* == Header == */}
+        <RegistrationHeader />
+        <main className="page2-main">
+          {/* === APPLICATION WORKSPACE ===*/}
 
-            <RegistrationHeader />
+          <section className="page2-workspace">
+            {/* ===  TOP AREA ==== */}
 
+            <div className="page2-top">
+              <div className="page2-heading">
+                <h1> Registration </h1>
+              </div>
+              <div className="page2-heading">
+                <span className="page2-eyebrow"> SET 2026 </span>
+              </div>
+            </div>
 
-            <main className="page2-main">
+            {/* == PROGRESS === */}
 
-                {/* =====================================
-                    APPLICATION WORKSPACE
-                ===================================== */}
+            <RegistrationPage2Progress
+              steps={registrationSteps}
+              currentStep={currentStep}
+              completedSteps={completedSteps}
+              onStepClick={handleStepClick}
+              isPaymentCompleted={isPaymentCompleted}
+            />
 
-                <section className="page2-workspace">
+            {/*STEP CONTEXT (kept intentionally minimal — each section already carries its own   heading, so this doesn't repeat it) */}
 
+            <div className="page2-section-heading">
+              <div>
+                <span>
+                  Step {String(currentStep).padStart(2, "0")} of{" "}
+                  {String(registrationSteps.length).padStart(2, "0")}
+                </span>
+              </div>
+            </div>
 
-                    {/* =================================
-                        TOP AREA
-                    ================================= */}
+            {/* ===  FORM AREA ==== */}
 
-                    <div className="page2-top">
+            <div className="page2-form-area">
+              {currentStep === 5 && (
+                <RegistrationPage2Review
+                  formData={formData}
+                  onChange={handleChange}
+                  onEditStep={handleStepClick}
+                  onConfirm={handleConfirmApplication}
+                />
+              )}
 
-                        <div className="page2-heading">
-                            <h1> Registration </h1>
-                        </div>
+              {currentStep === 6 && (
+                <RegistrationPaymentPage
+                  formData={formData}
+                  onBack={handleBackToReview}
+                  onPaymentSuccess={handlePaymentSuccess}
+                />
+              )}
+              {currentStep === 7 && (
+                <CreateAccount
+                  studentId={paymentResult?.studentId}
+                  email={formData.primaryEmail}
+                  onAccountCreated={handleAccountCreated}
+                />
+              )}
 
-                        <div className="page2-heading">
-                             <span className="page2-eyebrow"> SET 2026 </span>
-                        </div>
-                    </div>
+              {CurrentComponent && (
+                <CurrentComponent
+                  formData={formData}
+                  onChange={handleChange}
+                  validationErrors={validationErrors}
+                />
+              )}
+            </div>
 
-
-                    {/* =================================
-                        PROGRESS
-                    ================================= */}
-
-                    <RegistrationPage2Progress
-                        steps={registrationSteps}
-                        currentStep={currentStep}
-                        completedSteps={completedSteps}
-                        onStepClick={handleStepClick}
-                    />
-
-
-                    {/* =================================
-                        STEP CONTEXT
-                        (kept intentionally minimal — each
-                        section already carries its own
-                        heading, so this doesn't repeat it)
-                    ================================= */}
-
-                    <div className="page2-section-heading">
-                        <div>
-                            <span>
-                                Step {String(currentStep).padStart(2, "0")} of{" "}
-                                {String(registrationSteps.length).padStart(2, "0")}
-                            </span>
-                        </div>
-                    </div>
-
-
-                    {/* =================================
-                        FORM AREA
-                    ================================= */}
-
-                    <div className="page2-form-area">
-
-                        {currentStep === 5 && (
-                         <RegistrationPage2Review
-    formData={formData}
-    onChange={handleChange}
-    onEditStep={handleStepClick}
-    onConfirm={handleConfirmApplication}
-/>
-                        )}
-
-                      {currentStep === 6 && (
-   <RegistrationPaymentPage
-    formData={formData}
-    onBack={handleBackToReview}
-    onPaymentSuccess={handlePaymentSuccess}
-/>
-)}
-{currentStep === 7 && (
-    <CreateAccount
-        studentId={paymentResult?.studentId}
-        email={formData.primaryEmail}
-        onAccountCreated={handleAccountCreated}
-    />
-)}
-
-                        {CurrentComponent && (
-                            <CurrentComponent
-                                formData={formData}
-                                onChange={handleChange}
-                            />
-                        )}
-
-                    </div>
-
-
-                    {/* =================================
+            {/* =================================
                         NAVIGATION
                         (hidden on Review & Payment — both
                         have their own primary action)
                     ================================= */}
 
-                    {showSharedNavigation && (
-
-                        <RegistrationPage2Navigation
-                            currentStep={currentStep}
-                            totalSteps={registrationSteps.length}
-                            onPrevious={handlePrevious}
-                            onNext={handleNext}
-                        />
-
-                    )}
-
-
-                </section>
-
-            </main>
-
-        </div>
+            {showSharedNavigation && (
+              <RegistrationPage2Navigation
+                currentStep={currentStep}
+                totalSteps={registrationSteps.length}
+                onPrevious={handlePrevious}
+                onNext={handleNext}
+                isPaymentCompleted={isPaymentCompleted}
+              />
+            )}
+          </section>
+        </main>
+      </div>
     );
 }
 

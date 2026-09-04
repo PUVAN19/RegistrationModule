@@ -9,12 +9,8 @@ function App() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<Login />} />
-                {/* <Route path="/registration" element={<Registration />} />
-                <Route path="/registration/wizard" element={<RegistrationWizard />}  /> */}
-                 <Route
-                    path="/registration/page2"
-                    element={<RegistrationPage2 />}
-                />
+                
+                 <Route  path="/registration/page2"  element={<RegistrationPage2 />}  />
             </Routes>
         </BrowserRouter>
     );

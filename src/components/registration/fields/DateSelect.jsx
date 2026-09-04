@@ -7,16 +7,25 @@ function DateSelect({
     onChange,
     required = false
 }) {
+    const selectedDate =
+        value instanceof Date && !isNaN(value.getTime())
+            ? value
+            : null;
+
     return (
-        <div className="form-field">
+        <div className="form-field date-select-field">
+
             <label className="form-label">
                 {label}
-                {required && <span className="required-mark">*</span>}
+                {required && (
+                    <span className="required-mark">*</span>
+                )}
             </label>
 
             <DatePicker
-                selected={value || null}
+                selected={selectedDate}
                 onChange={onChange}
+
                 dateFormat="dd-MMM-yyyy"
                 placeholderText="Select date of birth"
 
@@ -33,8 +42,15 @@ function DateSelect({
 
                 className="form-control date-picker-input"
                 wrapperClassName="date-picker-wrapper"
+
+                popperPlacement="bottom-start"
                 popperClassName="date-picker-popper"
+
+                readOnly
+
+                portalId="datepicker-portal"
             />
+
         </div>
     );
 }

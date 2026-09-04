@@ -5,8 +5,37 @@ const nationalityOptions = [
 
 const countryCodes = ["+91", "+1", "+44", "+61"];
 
+function AddressCommunication({
+    formData,
+    onChange,
+    validationErrors = {}
+}) {
 
-function AddressCommunication({ formData, onChange }) {
+    const handleMobileChange = (event) => {
+        let value = event.target.value;
+
+        // Numbers only
+        value = value.replace(/\D/g, "");
+
+        // Maximum 10 digits
+        value = value.slice(0, 10);
+
+        onChange({
+            target: {
+                name: "mobileNumber",
+                value: value
+            }
+        });
+    };
+
+    const handleEmailChange = (event) => {
+        onChange({
+            target: {
+                name: event.target.name,
+                value: event.target.value.trim()
+            }
+        });
+    };
 
     return (
         <section className="registration-section">
@@ -35,7 +64,10 @@ function AddressCommunication({ formData, onChange }) {
 
                 <div className="form-field">
 
-                    <label className="form-label" htmlFor="mobileNumber">
+                    <label
+                        className="form-label"
+                        htmlFor="mobileNumber"
+                    >
                         Mobile Number
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -47,7 +79,6 @@ function AddressCommunication({ formData, onChange }) {
                             value={formData.countryCode || "+91"}
                             onChange={onChange}
                             className="form-select"
-                            aria-label="Country code"
                         >
                             {countryCodes.map((code) => (
                                 <option key={code} value={code}>
@@ -61,13 +92,21 @@ function AddressCommunication({ formData, onChange }) {
                             type="tel"
                             name="mobileNumber"
                             value={formData.mobileNumber || ""}
-                            onChange={onChange}
+                            onChange={handleMobileChange}
                             placeholder="Enter mobile number"
                             maxLength={10}
+                            inputMode="numeric"
+                            autoComplete="tel"
                             className="form-control"
                         />
 
                     </div>
+
+                    {validationErrors.mobileNumber && (
+                        <small className="text-danger">
+                            {validationErrors.mobileNumber}
+                        </small>
+                    )}
 
                 </div>
 
@@ -75,7 +114,11 @@ function AddressCommunication({ formData, onChange }) {
                 {/* Primary Email */}
 
                 <div className="form-field">
-                    <label className="form-label" htmlFor="primaryEmail">
+
+                    <label
+                        className="form-label"
+                        htmlFor="primaryEmail"
+                    >
                         Primary Email
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -86,18 +129,29 @@ function AddressCommunication({ formData, onChange }) {
                         name="primaryEmail"
                         className="form-control"
                         value={formData.primaryEmail || ""}
-                        onChange={onChange}
+                        onChange={handleEmailChange}
                         placeholder="Enter primary email"
                         maxLength={150}
-                        required
+                        autoComplete="email"
                     />
+
+                    {validationErrors.primaryEmail && (
+                        <small className="text-danger">
+                            {validationErrors.primaryEmail}
+                        </small>
+                    )}
+
                 </div>
 
 
                 {/* Confirm Email */}
 
                 <div className="form-field">
-                    <label className="form-label" htmlFor="confirmEmail">
+
+                    <label
+                        className="form-label"
+                        htmlFor="confirmEmail"
+                    >
                         Retype Primary Email
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -108,18 +162,29 @@ function AddressCommunication({ formData, onChange }) {
                         name="confirmEmail"
                         className="form-control"
                         value={formData.confirmEmail || ""}
-                        onChange={onChange}
+                        onChange={handleEmailChange}
                         placeholder="Re-enter primary email"
                         maxLength={150}
-                        required
+                        autoComplete="email"
                     />
+
+                    {validationErrors.confirmEmail && (
+                        <small className="text-danger">
+                            {validationErrors.confirmEmail}
+                        </small>
+                    )}
+
                 </div>
 
 
                 {/* Nationality */}
 
                 <div className="form-field">
-                    <label className="form-label" htmlFor="nationality">
+
+                    <label
+                        className="form-label"
+                        htmlFor="nationality"
+                    >
                         Nationality
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -130,15 +195,27 @@ function AddressCommunication({ formData, onChange }) {
                         className="form-select"
                         value={formData.nationality || ""}
                         onChange={onChange}
-                        required
                     >
-                        <option value="" disabled>Select Nationality</option>
+                        <option value="">
+                            Select Nationality
+                        </option>
+
                         {nationalityOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
+                            <option
+                                key={option.value}
+                                value={option.value}
+                            >
                                 {option.label}
                             </option>
                         ))}
                     </select>
+
+                    {validationErrors.nationality && (
+                        <small className="text-danger">
+                            {validationErrors.nationality}
+                        </small>
+                    )}
+
                 </div>
 
 
@@ -153,7 +230,13 @@ function AddressCommunication({ formData, onChange }) {
 
                     <div className="radio-pill-group">
 
-                        <label className={`radio-pill ${formData.isNri === "yes" ? "is-checked" : ""}`}>
+                        <label
+                            className={`radio-pill ${
+                                formData.isNri === "yes"
+                                    ? "is-checked"
+                                    : ""
+                            }`}
+                        >
                             <input
                                 type="radio"
                                 name="isNri"
@@ -164,7 +247,13 @@ function AddressCommunication({ formData, onChange }) {
                             Yes
                         </label>
 
-                        <label className={`radio-pill ${formData.isNri === "no" ? "is-checked" : ""}`}>
+                        <label
+                            className={`radio-pill ${
+                                formData.isNri === "no"
+                                    ? "is-checked"
+                                    : ""
+                            }`}
+                        >
                             <input
                                 type="radio"
                                 name="isNri"
@@ -177,6 +266,12 @@ function AddressCommunication({ formData, onChange }) {
 
                     </div>
 
+                    {validationErrors.isNri && (
+                        <small className="text-danger">
+                            {validationErrors.isNri}
+                        </small>
+                    )}
+
                 </div>
 
 
@@ -187,35 +282,57 @@ function AddressCommunication({ formData, onChange }) {
                     <div className="form-field span-full">
 
                         <label className="form-label">
-                            Do you wish to take admission under NRI
+                            Do you wish to take admission under NRI?
                             <span className="text-danger ms-1">*</span>
                         </label>
 
                         <div className="radio-pill-group">
 
-                            <label className={`radio-pill ${formData.nriAdmission === "yes" ? "is-checked" : ""}`}>
+                            <label
+                                className={`radio-pill ${
+                                    formData.nriAdmission === "yes"
+                                        ? "is-checked"
+                                        : ""
+                                }`}
+                            >
                                 <input
                                     type="radio"
                                     name="nriAdmission"
                                     value="yes"
-                                    checked={formData.nriAdmission === "yes"}
+                                    checked={
+                                        formData.nriAdmission === "yes"
+                                    }
                                     onChange={onChange}
                                 />
                                 Yes
                             </label>
 
-                            <label className={`radio-pill ${formData.nriAdmission === "no" ? "is-checked" : ""}`}>
+                            <label
+                                className={`radio-pill ${
+                                    formData.nriAdmission === "no"
+                                        ? "is-checked"
+                                        : ""
+                                }`}
+                            >
                                 <input
                                     type="radio"
                                     name="nriAdmission"
                                     value="no"
-                                    checked={formData.nriAdmission === "no"}
+                                    checked={
+                                        formData.nriAdmission === "no"
+                                    }
                                     onChange={onChange}
                                 />
                                 No
                             </label>
 
                         </div>
+
+                        {validationErrors.nriAdmission && (
+                            <small className="text-danger">
+                                {validationErrors.nriAdmission}
+                            </small>
+                        )}
 
                     </div>
 

@@ -16,17 +16,26 @@ const pwdOptions = [
     { value: "yes", label: "Yes" }
 ];
 
+function RegistrationInformation({formData,onChange, validationErrors = {}}) {
 
-function RegistrationInformation({ formData, onChange }) {
+    const handleApplicantNameChange = (event) => {
+        let value = event.target.value;
 
-    const handleDateChange = (event) => {
+        // Letters and spaces only
+        value = value.replace(/[^a-zA-Z\s]/g, "");
+        // Prevent multiple spaces
+        value = value.replace(/\s{2,}/g, " ");
+
         onChange({
             target: {
-                name: "dateOfBirth",
-                value: event.target.value
+                name: "applicantName",
+                value: value
             }
         });
     };
+
+    // Today's date - prevents selecting future DOB
+    const today = new Date().toISOString().split("T")[0];
 
     return (
         <section className="registration-section">
@@ -49,8 +58,14 @@ function RegistrationInformation({ formData, onChange }) {
 
             <div className="form-grid">
 
+                {/* Applicant Name */}
+
                 <div className="form-field span-full">
-                    <label className="form-label" htmlFor="applicantName">
+
+                    <label
+                        className="form-label"
+                        htmlFor="applicantName"
+                    >
                         Applicant Name
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -61,15 +76,29 @@ function RegistrationInformation({ formData, onChange }) {
                         name="applicantName"
                         className="form-control"
                         value={formData.applicantName || ""}
-                        onChange={onChange}
+                        onChange={handleApplicantNameChange}
                         placeholder="Enter full name as per 10th mark sheet"
                         maxLength={100}
-                        required
+                        autoComplete="name"
                     />
+
+                    {validationErrors.applicantName && (
+                        <small className="text-danger">
+                            {validationErrors.applicantName}
+                        </small>
+                    )}
+
                 </div>
 
+
+                {/* Date of Birth */}
+
                 <div className="form-field">
-                    <label className="form-label" htmlFor="dateOfBirth">
+
+                    <label
+                        className="form-label"
+                        htmlFor="dateOfBirth"
+                    >
                         Date of Birth
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -79,14 +108,35 @@ function RegistrationInformation({ formData, onChange }) {
                         type="date"
                         name="dateOfBirth"
                         className="form-control"
-                        value={formData.dateOfBirth || ""}
-                        onChange={handleDateChange}
-                        required
+                        value={
+                            formData.dateOfBirth
+                                ? new Date(formData.dateOfBirth)
+                                    .toISOString()
+                                    .split("T")[0]
+                                : ""
+                        }
+                        max={today}
+                        onChange={onChange}
+                      onKeyDown={(e) => e.preventDefault()}
                     />
+
+                    {validationErrors.dateOfBirth && (
+                        <small className="text-danger">
+                            {validationErrors.dateOfBirth}
+                        </small>
+                    )}
+
                 </div>
 
+
+                {/* Gender */}
+
                 <div className="form-field">
-                    <label className="form-label" htmlFor="gender">
+
+                    <label
+                        className="form-label"
+                        htmlFor="gender"
+                    >
                         Gender
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -97,19 +147,38 @@ function RegistrationInformation({ formData, onChange }) {
                         className="form-select"
                         value={formData.gender || ""}
                         onChange={onChange}
-                        required
                     >
-                        <option value="" disabled>Select Gender</option>
+                        <option value="">
+                            Select Gender
+                        </option>
+
                         {genderOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
+                            <option
+                                key={option.value}
+                                value={option.value}
+                            >
                                 {option.label}
                             </option>
                         ))}
                     </select>
+
+                    {validationErrors.gender && (
+                        <small className="text-danger">
+                            {validationErrors.gender}
+                        </small>
+                    )}
+
                 </div>
 
+
+                {/* Category */}
+
                 <div className="form-field">
-                    <label className="form-label" htmlFor="category">
+
+                    <label
+                        className="form-label"
+                        htmlFor="category"
+                    >
                         Category
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -120,19 +189,38 @@ function RegistrationInformation({ formData, onChange }) {
                         className="form-select"
                         value={formData.category || ""}
                         onChange={onChange}
-                        required
                     >
-                        <option value="" disabled>Select Category</option>
+                        <option value="">
+                            Select Category
+                        </option>
+
                         {categoryOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
+                            <option
+                                key={option.value}
+                                value={option.value}
+                            >
                                 {option.label}
                             </option>
                         ))}
                     </select>
+
+                    {validationErrors.category && (
+                        <small className="text-danger">
+                            {validationErrors.category}
+                        </small>
+                    )}
+
                 </div>
 
+
+                {/* PwD */}
+
                 <div className="form-field">
-                    <label className="form-label" htmlFor="pwdStatus">
+
+                    <label
+                        className="form-label"
+                        htmlFor="pwdStatus"
+                    >
                         Person with Disability (PwD)
                         <span className="text-danger ms-1">*</span>
                     </label>
@@ -143,15 +231,27 @@ function RegistrationInformation({ formData, onChange }) {
                         className="form-select"
                         value={formData.pwdStatus || ""}
                         onChange={onChange}
-                        required
                     >
-                        <option value="" disabled>Select</option>
+                        <option value="">
+                            Select
+                        </option>
+
                         {pwdOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
+                            <option
+                                key={option.value}
+                                value={option.value}
+                            >
                                 {option.label}
                             </option>
                         ))}
                     </select>
+
+                    {validationErrors.pwdStatus && (
+                        <small className="text-danger">
+                            {validationErrors.pwdStatus}
+                        </small>
+                    )}
+
                 </div>
 
             </div>

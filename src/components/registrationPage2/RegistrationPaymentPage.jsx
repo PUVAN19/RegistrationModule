@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
-
+import { completePayment } from "../../api/paymentApi";
 const BASE_FEE = 1000;
 const TEST_FEE = 750;
 
 function computeFees(formData) {
-
     const lines = [
         {
             label: "Application processing fee",
@@ -41,8 +40,7 @@ function computeFees(formData) {
 function RegistrationPaymentPage({
     formData,
     onBack,
-    onPaymentSuccess,
-    onCreateAccount
+    onPaymentSuccess
 }) {
 
     const { lines, total } = useMemo(
@@ -50,10 +48,7 @@ function RegistrationPaymentPage({
         [formData]
     );
 
-
-    // =========================================
-    // CARD DETAILS
-    // =========================================
+    const [paymentMethod, setPaymentMethod] = useState("upi");
 
     const [cardDetails, setCardDetails] = useState({
         cardName: "",
@@ -62,10 +57,9 @@ function RegistrationPaymentPage({
         cvv: ""
     });
 
+    const [upiId, setUpiId] = useState("");
 
-    // =========================================
-    // PAYMENT STATE
-    // =========================================
+    const [selectedUpiApp, setSelectedUpiApp] = useState("");
 
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -73,431 +67,576 @@ function RegistrationPaymentPage({
 
     const [paymentResult, setPaymentResult] = useState(null);
 
+    const [errors, setErrors] = useState({});
 
-    // =========================================
-    // CARD CHANGE
-    // =========================================
 
-    const handleCardChange = (event) => {
+    /* =====================================================
+       CARD HOLDER NAME
+    ===================================================== */
 
-        const {
-            name,
-            value
-        } = event.target;
+    const handleCardNameChange = (event) => {
+
+        let value = event.target.value;
+
+        value = value.replace(/[^a-zA-Z\s]/g, "");
+        value = value.replace(/\s{2,}/g, " ");
 
         setCardDetails((previous) => ({
             ...previous,
-            [name]: value
+            cardName: value
+        }));
+
+        setErrors((previous) => ({
+            ...previous,
+            cardName: ""
         }));
     };
 
 
-    // =========================================
-    // PAYMENT FORM VALIDATION
-    // =========================================
+    /* =====================================================
+       CARD NUMBER
+    ===================================================== */
 
-    const isFormValid =
-        cardDetails.cardName.trim().length > 1 &&
-        cardDetails.cardNumber
-            .replace(/\s/g, "")
-            .length >= 12 &&
-        cardDetails.expiry.length >= 4 &&
-        cardDetails.cvv.length >= 3;
+    const handleCardNumberChange = (event) => {
+
+        let value = event.target.value;
+
+        value = value.replace(/\D/g, "");
+        value = value.substring(0, 16);
+
+        const formattedValue = value
+            .replace(/(.{4})/g, "$1 ")
+            .trim();
+
+        setCardDetails((previous) => ({
+            ...previous,
+            cardNumber: formattedValue
+        }));
+
+        setErrors((previous) => ({
+            ...previous,
+            cardNumber: ""
+        }));
+    };
 
 
-    // =========================================
-    // PROCESS PAYMENT
-    // =========================================
+    /* =====================================================
+       EXPIRY
+    ===================================================== */
 
-    const handlePay = async (event) => {
+    const handleExpiryChange = (event) => {
 
-        event.preventDefault();
+        let value = event.target.value;
 
-        if (!isFormValid || isProcessing) {
-            return;
+        value = value.replace(/\D/g, "");
+        value = value.substring(0, 4);
+
+        if (value.length >= 3) {
+            value =
+                value.substring(0, 2) +
+                "/" +
+                value.substring(2);
         }
 
-        setIsProcessing(true);
+        setCardDetails((previous) => ({
+            ...previous,
+            expiry: value
+        }));
 
-        try {
-
-            // -----------------------------------------
-            // Remove frontend-only fields
-            // -----------------------------------------
-
-            const {
-                confirmEmail,
-                photo,
-                signature,
-                idProof,
-                academicCertificate,
-                ...registrationData
-            } = formData;
+        setErrors((previous) => ({
+            ...previous,
+            expiry: ""
+        }));
+    };
 
 
-            // -----------------------------------------
-            // Call ASP.NET Core Web API
-            // -----------------------------------------
+    /* =====================================================
+       CVV
+    ===================================================== */
 
-            const response = await fetch(
-                "https://localhost:7001/api/Payment/complete",
-                {
-                    method: "POST",
+    const handleCvvChange = (event) => {
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+        let value = event.target.value;
 
-                    body: JSON.stringify({
-                        amount: total,
-                        registration: registrationData
-                    })
+        value = value.replace(/\D/g, "");
+        value = value.substring(0, 4);
+
+        setCardDetails((previous) => ({
+            ...previous,
+            cvv: value
+        }));
+
+        setErrors((previous) => ({
+            ...previous,
+            cvv: ""
+        }));
+    };
+
+
+    /* =====================================================
+       CARD VALIDATION
+    ===================================================== */
+
+    const validateCard = () => {
+
+        const newErrors = {};
+
+        const cardName =
+            cardDetails.cardName.trim();
+
+        const cardNumber =
+            cardDetails.cardNumber.replace(/\s/g, "");
+
+        const expiry =
+            cardDetails.expiry;
+
+        const cvv =
+            cardDetails.cvv;
+
+
+        if (!cardName) {
+
+            newErrors.cardName =
+                "Cardholder name is required.";
+
+        }
+        else if (cardName.length < 2) {
+
+            newErrors.cardName =
+                "Please enter a valid cardholder name.";
+
+        }
+
+
+        if (!cardNumber) {
+
+            newErrors.cardNumber =
+                "Card number is required.";
+
+        }
+        else if (cardNumber.length !== 16) {
+
+            newErrors.cardNumber =
+                "Card number must contain 16 digits.";
+
+        }
+
+
+        if (!expiry) {
+
+            newErrors.expiry =
+                "Expiry date is required.";
+
+        }
+        else {
+
+            const match =
+                expiry.match(/^(\d{2})\/(\d{2})$/);
+
+            if (!match) {
+
+                newErrors.expiry =
+                    "Enter expiry as MM/YY.";
+
+            }
+            else {
+
+                const month =
+                    parseInt(match[1], 10);
+
+                const year =
+                    parseInt(match[2], 10);
+
+                const currentDate =
+                    new Date();
+
+                const currentYear =
+                    currentDate.getFullYear() % 100;
+
+                const currentMonth =
+                    currentDate.getMonth() + 1;
+
+
+                if (
+                    month < 1 ||
+                    month > 12
+                ) {
+
+                    newErrors.expiry =
+                        "Enter a valid month.";
+
                 }
-            );
+                else if (
+                    year < currentYear ||
+                    (
+                        year === currentYear &&
+                        month < currentMonth
+                    )
+                ) {
 
+                    newErrors.expiry =
+                        "Card expiry date has passed.";
 
-            // -----------------------------------------
-            // Read API response
-            // -----------------------------------------
-
-            const result = await response.json();
-
-
-            // -----------------------------------------
-            // Handle API error
-            // -----------------------------------------
-
-            if (!response.ok) {
-
-                throw new Error(
-                    result.message ||
-                    "Payment failed."
-                );
+                }
             }
-
-
-            // -----------------------------------------
-            // Payment + Registration successful
-            // -----------------------------------------
-
-            console.log(
-                "Payment and registration completed:",
-                result
-            );
-
-
-            setPaymentResult(result);
-
-            setIsPaid(true);
-
-
-            if (onPaymentSuccess) {
-                onPaymentSuccess(result);
-            }
-
-
-        } catch (error) {
-
-            console.error(
-                "Payment error:",
-                error
-            );
-
-            alert(
-                error.message ||
-                "Something went wrong while processing payment."
-            );
-
-        } finally {
-
-            setIsProcessing(false);
         }
+
+
+        if (!cvv) {
+
+            newErrors.cvv =
+                "CVV is required.";
+
+        }
+        else if (
+            cvv.length < 3 ||
+            cvv.length > 4
+        ) {
+
+            newErrors.cvv =
+                "CVV must contain 3 or 4 digits.";
+
+        }
+
+
+        return newErrors;
     };
 
 
-    // =========================================
-    // DOWNLOAD / PRINT REGISTRATION FORM
-    // =========================================
+    /* =====================================================
+       UPI VALIDATION
+    ===================================================== */
 
-    const handleDownloadRegistration = () => {
+    const validateUpi = () => {
 
-        window.print();
+        const newErrors = {};
+
+        if (!upiId.trim()) {
+
+            newErrors.upiId =
+                "UPI ID is required.";
+
+        }
+        else if (
+            !/^[a-zA-Z0-9._-]+@[a-zA-Z]{2,}$/.test(
+                upiId.trim()
+            )
+        ) {
+
+            newErrors.upiId =
+                "Enter a valid UPI ID.";
+
+        }
+
+        return newErrors;
     };
 
 
-    // =========================================
-    // MASK CARD NUMBER
-    // =========================================
+  const handlePay = async (event) => {
+    event.preventDefault();
 
-    const maskedCardNumber =
-        cardDetails.cardNumber
+    if (isProcessing) {
+        return;
+    }
 
-            ? cardDetails.cardNumber
-                .replace(/\D/g, "")
-                .padEnd(16, "•")
-                .replace(/(.{4})/g, "$1 ")
-                .trim()
+    let validationErrors = {};
 
-            : "•••• •••• •••• ••••";
+    if (paymentMethod === "card") {
+        validationErrors = validateCard();
+    } else if (paymentMethod === "upi") {
+        validationErrors = validateUpi();
+    }
 
+    if (Object.keys(validationErrors).length > 0) {
+        setErrors(validationErrors);
+        return;
+    }
 
-    // =========================================
-    // PAYMENT SUCCESS SCREEN
-    // =========================================
+    setErrors({});
+    setIsProcessing(true);
 
-    if (isPaid) {
+    try {
+        const {
+            confirmEmail,
+            photo,
+            signature,
+            idProof,
+            academicCertificate,
+            ...registrationData
+        } = formData;
 
-        return (
+        const response = await completePayment({
+            amount: total,
+            paymentMethod: paymentMethod,
+            upiId: paymentMethod === "upi" ? upiId : null,
+            registration: registrationData
+        });
 
-            <div className="payment-success">
+        console.log("Complete payment response:", response);
 
-                {/* Success Icon */}
+        // Axios response OR direct data
+        const result = response?.data ?? response;
 
-                <div className="payment-success-stamp">
+        console.log("Payment result:", result);
 
-                    <i className="fa-solid fa-check"></i>
+        /*
+         * IMPORTANT
+         * Payment must actually be successful.
+         */
+        if (
+            !result ||
+            String(result.paymentStatus || "").toLowerCase() !== "success"
+        ) {
+            throw new Error(
+                result?.message ||
+                "Payment failed. Please try again."
+            );
+        }
 
-                </div>
+        /*
+         * Payment is successful.
+         *
+         * DO NOT move to Create Account here.
+         * First show the payment success screen.
+         */
+        setPaymentResult(result);
+        setIsPaid(true);
 
+    } catch (error) {
 
-                {/* Title */}
+        console.error("Payment error:", error);
 
-                <h2>
-                    Registration successful
-                </h2>
+        setIsPaid(false);
+        setPaymentResult(null);
 
+        const message =
+            error?.response?.data?.message ||
+            error?.response?.data?.title ||
+            error?.message ||
+            "Something went wrong while processing payment.";
 
-                {/* Message */}
+        alert(message);
 
-                <p>
-                    Your SET / SITEEE 2026 application has been
-                    submitted and payment received successfully.
-                </p>
+    } finally {
+        setIsProcessing(false);
+    }
+};
 
+    /* =====================================================
+       SUCCESS SCREEN
+    ===================================================== */
 
-                {/* Registration Number */}
+   if (isPaid) {
+    return (
+        <div className="payment-success">
 
-                <span className="app-id">
+            <div className="payment-success-stamp">
+                <i className="fa-solid fa-check"></i>
+            </div>
 
-                    Registration Number:{" "}
+            <h2>
+                Payment Successful
+            </h2>
 
-                    {paymentResult?.regNumber || "-"}
+            <p>
+                Your payment has been completed successfully.
+                <br />
+                You can now continue to create your account.
+            </p>
 
-                </span>
+            <div className="success-details">
 
-
-                {/* Student ID */}
-
-                <span className="app-id">
-
-                    Student ID:{" "}
-
-                    {paymentResult?.studentId || "-"}
-
-                </span>
-
-
-                {/* Payment Status */}
-
-                <span className="app-id">
-
-                    Payment Status:{" "}
-
-                    {paymentResult?.paymentStatus || "Success"}
-
-                </span>
-
-
-                {/* Email Message */}
-
-                <div
-                    style={{
-                        fontSize: "12px",
-                        color: "var(--ink-soft)",
-                        marginTop: "12px"
-                    }}
-                >
-
-                    A confirmation has been sent to{" "}
+                <div className="success-detail">
+                    <span>Registration Number</span>
 
                     <strong>
-                        {
-                            formData.primaryEmail ||
-                            "your registered email"
-                        }
+                        {paymentResult?.regNumber || "-"}
                     </strong>
-
-                    .
-
-                    <br />
-
-                    Please keep your Registration Number
-                    and Student ID safe.
-
                 </div>
 
+                <div className="success-detail">
+                    <span>Student ID</span>
 
-                {/* =================================
-                    ACTION BUTTONS
-                ================================= */}
+                    <strong>
+                        {paymentResult?.studentId || "-"}
+                    </strong>
+                </div>
 
-                <div
-                    className="registration-success-actions"
-                    style={{
-                        display: "flex",
-                        gap: "10px",
-                        justifyContent: "center",
-                        flexWrap: "wrap",
-                        marginTop: "22px"
-                    }}
-                >
+                <div className="success-detail">
+                    <span>Payment Status</span>
 
-                    {/* Download Registration Form */}
-
-                    <button
-                        type="button"
-                        className="page2-back-button"
-                        onClick={handleDownloadRegistration}
-                    >
-
-                        <i className="fa-solid fa-download"></i>
-
-                        &nbsp;
-
-                        Download Registration Form
-
-                    </button>
-
-
-                    {/* Create Account */}
-
-                    <button
-                        type="button"
-                        className="pay-button"
-                        onClick={onCreateAccount}
-                        style={{
-                            width: "auto",
-                            padding: "10px 20px"
-                        }}
-                    >
-
-                        Create Account
-
-                        <span style={{ marginLeft: "8px" }}>
-                            →
-                        </span>
-
-                    </button>
-
+                    <strong className="payment-success-status">
+                        {paymentResult?.paymentStatus || "Success"}
+                    </strong>
                 </div>
 
             </div>
-        );
-    }
+
+            <div className="success-email-message">
+
+                A confirmation has been sent to{" "}
+
+                <strong>
+                    {formData.primaryEmail}
+                </strong>
+
+                .
+
+                <br />
+
+                Your payment has been successfully recorded.
+
+            </div>
+
+            <button
+    type="button"
+    className="btn btn-danger px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
+    onClick={() => {
+        if (onPaymentSuccess) {
+            onPaymentSuccess(paymentResult);
+        }
+    }}
+>
+    Continue to Create Account
+    <i className="fa-solid fa-arrow-right"></i>
+</button>
+        </div>
+    );
+}
 
 
-    // =========================================
-    // PAYMENT PAGE
-    // =========================================
+    /* =====================================================
+       PAYMENT PAGE
+    ===================================================== */
 
     return (
 
-        <div className="payment-step">
+        <div className="payment-page">
 
-            <div className="payment-shell">
+            <div className="payment-layout">
 
 
-                {/* =====================================
-                    FEE SUMMARY
-                ===================================== */}
+                {/* =================================================
+                   LEFT - ORDER SUMMARY
+                ================================================= */}
 
-                <div className="payment-summary-card">
+                <div className="payment-order">
+
+                    <div className="payment-order-header">
+
+                        <div className="payment-order-icon">
+                            <i className="fa-solid fa-receipt"></i>
+                        </div>
+
+                        <div>
+                            <h2>
+                                Payment Summary
+                            </h2>
+
+                            <p>
+                                Review your application fees
+                            </p>
+                        </div>
+
+                    </div>
 
 
                     {/* Applicant */}
 
-                    <div className="applicant-strip">
+                    <div className="payment-applicant">
 
-                        <div className="avatar-dot">
+                        <div className="payment-avatar">
 
-                            {
-                                (
-                                    formData.applicantName ||
-                                    "A"
-                                )
-                                    .charAt(0)
-                                    .toUpperCase()
-                            }
+                            {(
+                                formData.applicantName ||
+                                "A"
+                            )
+                                .charAt(0)
+                                .toUpperCase()}
 
                         </div>
-
 
                         <div>
 
                             <strong>
-
                                 {
                                     formData.applicantName ||
                                     "Applicant"
                                 }
-
                             </strong>
 
-
-                            <small>
-
+                            <span>
                                 {
                                     formData.primaryEmail ||
                                     "No email provided"
                                 }
-
-                            </small>
+                            </span>
 
                         </div>
 
                     </div>
 
 
-                    {/* Fee Lines */}
+                    {/* Fee lines */}
 
-                    {lines.map((line) => (
+                    <div className="payment-fees">
 
-                        <div
-                            className="fee-line"
-                            key={line.label}
-                        >
+                        {lines.map((line) => (
 
-                            <span>
-                                {line.label}
-                            </span>
+                            <div
+                                className="payment-fee-row"
+                                key={line.label}
+                            >
 
+                                <span>
+                                    {line.label}
+                                </span>
 
-                            <span>
+                                <strong>
+                                    ₹
+                                    {line.amount.toLocaleString(
+                                        "en-IN"
+                                    )}
+                                </strong>
 
-                                ₹
-                                {line.amount.toLocaleString("en-IN")}
+                            </div>
 
-                            </span>
+                        ))}
 
-                        </div>
-
-                    ))}
+                    </div>
 
 
                     {/* Total */}
 
-                    <div className="fee-line fee-total">
+                    <div className="payment-total">
 
                         <span>
                             Total payable
                         </span>
 
+                        <strong>
+                            ₹
+                            {total.toLocaleString(
+                                "en-IN"
+                            )}
+                        </strong>
+
+                    </div>
+
+
+                    {/* Secure */}
+
+                    <div className="payment-trust">
+
+                        <div>
+                            <i className="fa-solid fa-shield-halved"></i>
+                        </div>
 
                         <span>
-
-                            ₹
-                            {total.toLocaleString("en-IN")}
-
+                            Secure payment
+                            <small>
+                                Your payment information is protected.
+                            </small>
                         </span>
 
                     </div>
@@ -507,214 +646,603 @@ function RegistrationPaymentPage({
 
                     <button
                         type="button"
-                        className="page2-back-button"
-                        style={{
-                            marginTop: "14px",
-                            width: "100%",
-                            justifyContent: "center"
-                        }}
+                        className="payment-back"
                         onClick={onBack}
                         disabled={isProcessing}
                     >
-
-                        <span>
-                            ←
-                        </span>
-
-                        Back to review
-
+                        <i className="fa-solid fa-arrow-left"></i>
+                        Back to Review
                     </button>
 
                 </div>
 
 
-                {/* =====================================
-                    CARD FORM
-                ===================================== */}
+                {/* =================================================
+                   RIGHT - PAYMENT
+                ================================================= */}
 
-                <div className="payment-form-card">
+                <div className="payment-method-card">
 
+                    <div className="payment-method-header">
 
-                    {/* Mock Card */}
+                        <div>
 
-                    <div className="payment-card-mock">
+                            <h2>
+                                Complete Payment
+                            </h2>
 
-                        <div className="chip" />
-
-
-                        <div className="payment-card-number">
-
-                            {maskedCardNumber}
+                            <p>
+                                Choose your preferred payment method
+                            </p>
 
                         </div>
 
+                        <div className="payment-amount-badge">
 
-                        <div className="payment-card-meta">
-
-                            <span>
-
-                                {
-                                    cardDetails.cardName ||
-                                    "CARDHOLDER NAME"
-                                }
-
-                            </span>
-
-
-                            <span>
-
-                                {
-                                    cardDetails.expiry ||
-                                    "MM/YY"
-                                }
-
-                            </span>
+                            ₹
+                            {total.toLocaleString("en-IN")}
 
                         </div>
 
                     </div>
 
 
-                    {/* Card Form */}
+                    {/* Payment tabs */}
 
-                    <form onSubmit={handlePay}>
-
-
-                        {/* Cardholder Name */}
-
-                        <div className="payment-form-row full">
-
-                            <div className="form-field">
-
-                                <label className="form-label">
-                                    Cardholder Name
-                                </label>
-
-
-                                <input
-                                    type="text"
-                                    name="cardName"
-                                    className="form-control"
-                                    placeholder="Name on card"
-                                    value={cardDetails.cardName}
-                                    onChange={handleCardChange}
-                                    maxLength={60}
-                                    disabled={isProcessing}
-                                />
-
-                            </div>
-
-                        </div>
-
-
-                        {/* Card Number */}
-
-                        <div className="payment-form-row full">
-
-                            <div className="form-field">
-
-                                <label className="form-label">
-                                    Card Number
-                                </label>
-
-
-                                <input
-                                    type="text"
-                                    name="cardNumber"
-                                    className="form-control"
-                                    placeholder="1234 5678 9012 3456"
-                                    value={cardDetails.cardNumber}
-                                    onChange={handleCardChange}
-                                    maxLength={19}
-                                    inputMode="numeric"
-                                    disabled={isProcessing}
-                                />
-
-                            </div>
-
-                        </div>
-
-
-                        {/* Expiry + CVV */}
-
-                        <div className="payment-form-row">
-
-                            <div className="form-field">
-
-                                <label className="form-label">
-                                    Expiry
-                                </label>
-
-
-                                <input
-                                    type="text"
-                                    name="expiry"
-                                    className="form-control"
-                                    placeholder="MM/YY"
-                                    value={cardDetails.expiry}
-                                    onChange={handleCardChange}
-                                    maxLength={5}
-                                    disabled={isProcessing}
-                                />
-
-                            </div>
-
-
-                            <div className="form-field">
-
-                                <label className="form-label">
-                                    CVV
-                                </label>
-
-
-                                <input
-                                    type="password"
-                                    name="cvv"
-                                    className="form-control"
-                                    placeholder="•••"
-                                    value={cardDetails.cvv}
-                                    onChange={handleCardChange}
-                                    maxLength={4}
-                                    inputMode="numeric"
-                                    disabled={isProcessing}
-                                />
-
-                            </div>
-
-                        </div>
-
-
-                        {/* Pay Button */}
+                    <div className="payment-method-tabs">
 
                         <button
-                            type="submit"
-                            className="pay-button"
-                            disabled={
-                                !isFormValid ||
-                                isProcessing
+                            type="button"
+                            className={
+                                paymentMethod === "upi"
+                                    ? "payment-method-tab active"
+                                    : "payment-method-tab"
                             }
+                            onClick={() => {
+                                setPaymentMethod("upi");
+                                setErrors({});
+                            }}
                         >
 
-                            {
-                                isProcessing
-                                    ? "Processing…"
-                                    : `Pay ₹${total.toLocaleString("en-IN")}`
-                            }
+                            <i className="fa-solid fa-mobile-screen-button"></i>
+
+                            <span>
+                                UPI
+                            </span>
 
                         </button>
 
 
-                        {/* Security Note */}
+                        <button
+                            type="button"
+                            className={
+                                paymentMethod === "card"
+                                    ? "payment-method-tab active"
+                                    : "payment-method-tab"
+                            }
+                            onClick={() => {
+                                setPaymentMethod("card");
+                                setErrors({});
+                            }}
+                        >
 
-                        <div className="payment-secure-note">
+                            <i className="fa-regular fa-credit-card"></i>
 
-                            <i className="fa-solid fa-shield-halved"></i>
+                            <span>
+                                Card
+                            </span>
 
-                            This is a demo payment form —
-                            no real transaction is made.
+                        </button>
+
+
+                        <button
+                            type="button"
+                            className={
+                                paymentMethod === "netbanking"
+                                    ? "payment-method-tab active"
+                                    : "payment-method-tab"
+                            }
+                            onClick={() => {
+                                setPaymentMethod("netbanking");
+                                setErrors({});
+                            }}
+                        >
+
+                            <i className="fa-solid fa-building-columns"></i>
+
+                            <span>
+                                Net Banking
+                            </span>
+
+                        </button>
+
+                    </div>
+
+
+                    <form
+                        className="payment-form"
+                        onSubmit={handlePay}
+                    >
+
+
+                        {/* =================================================
+                           UPI
+                        ================================================= */}
+
+                        {paymentMethod === "upi" && (
+
+                            <div className="upi-payment">
+
+                                <div className="upi-heading">
+
+                                    <div className="upi-icon">
+                                        <i className="fa-solid fa-mobile-screen"></i>
+                                    </div>
+
+                                    <div>
+                                        <h3>
+                                            Pay using UPI
+                                        </h3>
+
+                                        <p>
+                                            Enter your UPI ID to continue
+                                        </p>
+                                    </div>
+
+                                </div>
+
+
+                                <div className="upi-apps">
+
+                                    <button
+                                        type="button"
+                                        className={
+                                            selectedUpiApp === "gpay"
+                                                ? "upi-app active"
+                                                : "upi-app"
+                                        }
+                                        onClick={() => {
+                                            setSelectedUpiApp("gpay");
+                                            setUpiId("");
+                                            setErrors({});
+                                        }}
+                                    >
+                                        <span className="upi-app-logo">
+                                            G
+                                        </span>
+
+                                        <span>
+                                            Google Pay
+                                        </span>
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        className={
+                                            selectedUpiApp === "phonepe"
+                                                ? "upi-app active"
+                                                : "upi-app"
+                                        }
+                                        onClick={() => {
+                                            setSelectedUpiApp("phonepe");
+                                            setUpiId("");
+                                            setErrors({});
+                                        }}
+                                    >
+                                        <span className="upi-app-logo">
+                                            P
+                                        </span>
+
+                                        <span>
+                                            PhonePe
+                                        </span>
+                                    </button>
+
+
+                                    <button
+                                        type="button"
+                                        className={
+                                            selectedUpiApp === "paytm"
+                                                ? "upi-app active"
+                                                : "upi-app"
+                                        }
+                                        onClick={() => {
+                                            setSelectedUpiApp("paytm");
+                                            setUpiId("");
+                                            setErrors({});
+                                        }}
+                                    >
+                                        <span className="upi-app-logo">
+                                            P
+                                        </span>
+
+                                        <span>
+                                            Paytm
+                                        </span>
+                                    </button>
+
+                                </div>
+
+
+                                <div className="payment-or">
+                                    <span>OR</span>
+                                </div>
+
+
+                                <div className="payment-field">
+
+                                    <label>
+                                        UPI ID
+                                        <span>*</span>
+                                    </label>
+
+                                    <div className="upi-input-wrapper">
+
+                                        <i className="fa-solid fa-at"></i>
+
+                                        <input
+                                            type="text"
+                                            value={upiId}
+                                            onChange={(event) => {
+                                                setUpiId(
+                                                    event.target.value
+                                                );
+
+                                                setErrors(
+                                                    (previous) => ({
+                                                        ...previous,
+                                                        upiId: ""
+                                                    })
+                                                );
+                                            }}
+                                            placeholder="example@upi"
+                                            className={
+                                                errors.upiId
+                                                    ? "payment-input error"
+                                                    : "payment-input"
+                                            }
+                                            disabled={isProcessing}
+                                        />
+
+                                    </div>
+
+                                    {errors.upiId && (
+                                        <small className="payment-error">
+                                            {errors.upiId}
+                                        </small>
+                                    )}
+
+                                </div>
+
+
+                                <div className="upi-info">
+
+                                    <i className="fa-solid fa-circle-info"></i>
+
+                                    <span>
+                                        You will receive a payment
+                                        request in your UPI application.
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        )}
+
+
+                        {/* =================================================
+                           CARD
+                        ================================================= */}
+
+                        {paymentMethod === "card" && (
+
+                            <div className="card-payment">
+
+                                <div className="card-mini">
+
+                                    <div className="card-mini-top">
+
+                                        <span>
+                                            SET 2026
+                                        </span>
+
+                                        <i className="fa-brands fa-cc-visa"></i>
+
+                                    </div>
+
+                                    <div className="card-mini-number">
+
+                                        {cardDetails.cardNumber ||
+                                            "•••• •••• •••• ••••"}
+
+                                    </div>
+
+                                    <div className="card-mini-bottom">
+
+                                        <span>
+                                            {
+                                                cardDetails.cardName ||
+                                                "CARDHOLDER NAME"
+                                            }
+                                        </span>
+
+                                        <span>
+                                            {
+                                                cardDetails.expiry ||
+                                                "MM/YY"
+                                            }
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div className="payment-field">
+
+                                    <label>
+                                        Cardholder Name
+                                        <span>*</span>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        value={cardDetails.cardName}
+                                        onChange={handleCardNameChange}
+                                        placeholder="Name on card"
+                                        maxLength={60}
+                                        className={
+                                            errors.cardName
+                                                ? "payment-input error"
+                                                : "payment-input"
+                                        }
+                                        disabled={isProcessing}
+                                    />
+
+                                    {errors.cardName && (
+                                        <small className="payment-error">
+                                            {errors.cardName}
+                                        </small>
+                                    )}
+
+                                </div>
+
+
+                                <div className="payment-field">
+
+                                    <label>
+                                        Card Number
+                                        <span>*</span>
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        value={cardDetails.cardNumber}
+                                        onChange={handleCardNumberChange}
+                                        placeholder="1234 5678 9012 3456"
+                                        maxLength={19}
+                                        inputMode="numeric"
+                                        className={
+                                            errors.cardNumber
+                                                ? "payment-input error"
+                                                : "payment-input"
+                                        }
+                                        disabled={isProcessing}
+                                    />
+
+                                    {errors.cardNumber && (
+                                        <small className="payment-error">
+                                            {errors.cardNumber}
+                                        </small>
+                                    )}
+
+                                </div>
+
+
+                                <div className="payment-two-columns">
+
+                                    <div className="payment-field">
+
+                                        <label>
+                                            Expiry
+                                            <span>*</span>
+                                        </label>
+
+                                        <input
+                                            type="text"
+                                            value={cardDetails.expiry}
+                                            onChange={handleExpiryChange}
+                                            placeholder="MM/YY"
+                                            maxLength={5}
+                                            inputMode="numeric"
+                                            className={
+                                                errors.expiry
+                                                    ? "payment-input error"
+                                                    : "payment-input"
+                                            }
+                                            disabled={isProcessing}
+                                        />
+
+                                        {errors.expiry && (
+                                            <small className="payment-error">
+                                                {errors.expiry}
+                                            </small>
+                                        )}
+
+                                    </div>
+
+
+                                    <div className="payment-field">
+
+                                        <label>
+                                            CVV
+                                            <span>*</span>
+                                        </label>
+
+                                        <input
+                                            type="password"
+                                            value={cardDetails.cvv}
+                                            onChange={handleCvvChange}
+                                            placeholder="•••"
+                                            maxLength={4}
+                                            inputMode="numeric"
+                                            className={
+                                                errors.cvv
+                                                    ? "payment-input error"
+                                                    : "payment-input"
+                                            }
+                                            disabled={isProcessing}
+                                        />
+
+                                        {errors.cvv && (
+                                            <small className="payment-error">
+                                                {errors.cvv}
+                                            </small>
+                                        )}
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        )}
+
+
+                        {/* =================================================
+                           NET BANKING
+                        ================================================= */}
+
+                        {paymentMethod === "netbanking" && (
+
+                            <div className="netbanking-payment">
+
+                                <div className="upi-heading">
+
+                                    <div className="upi-icon">
+                                        <i className="fa-solid fa-building-columns"></i>
+                                    </div>
+
+                                    <div>
+
+                                        <h3>
+                                            Net Banking
+                                        </h3>
+
+                                        <p>
+                                            Select your bank to continue
+                                        </p>
+
+                                    </div>
+
+                                </div>
+
+
+                                <div className="bank-grid">
+
+                                    <button
+                                        type="button"
+                                        className="bank-option"
+                                    >
+                                        <i className="fa-solid fa-building-columns"></i>
+                                        <span>
+                                            SBI
+                                        </span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="bank-option"
+                                    >
+                                        <i className="fa-solid fa-building-columns"></i>
+                                        <span>
+                                            HDFC Bank
+                                        </span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="bank-option"
+                                    >
+                                        <i className="fa-solid fa-building-columns"></i>
+                                        <span>
+                                            ICICI Bank
+                                        </span>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        className="bank-option"
+                                    >
+                                        <i className="fa-solid fa-building-columns"></i>
+                                        <span>
+                                            Axis Bank
+                                        </span>
+                                    </button>
+
+                                </div>
+
+                                <p className="netbanking-note">
+                                    This is currently a demo payment
+                                    interface. Connect your payment gateway
+                                    for real transactions.
+                                </p>
+
+                            </div>
+
+                        )}
+
+
+                        {/* =================================================
+                           PAY
+                        ================================================= */}
+
+                        <button
+                            type="submit"
+                            className="payment-pay-button"
+                            disabled={isProcessing}
+                        >
+
+                            {isProcessing ? (
+
+                                <>
+                                    <i className="fa-solid fa-spinner fa-spin"></i>
+                                    Processing Payment...
+                                </>
+
+                            ) : (
+
+                                <>
+                                    Pay ₹
+                                    {total.toLocaleString("en-IN")}
+
+                                    <i className="fa-solid fa-arrow-right"></i>
+                                </>
+
+                            )}
+
+                        </button>
+
+
+                        <div className="payment-bottom-note">
+
+                            <i className="fa-solid fa-lock"></i>
+
+                            <span>
+                                100% secure payment
+                            </span>
+
+                            <span className="payment-dot">
+                                •
+                            </span>
+
+                            <span>
+                                SSL encrypted
+                            </span>
 
                         </div>
-
 
                     </form>
 
@@ -725,6 +1253,5 @@ function RegistrationPaymentPage({
         </div>
     );
 }
-
 
 export default RegistrationPaymentPage;

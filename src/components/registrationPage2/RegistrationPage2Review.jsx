@@ -382,19 +382,9 @@ function RegistrationPage2Review({
 
                 <div />
 
-                <button
-    type="button"
-    className="page2-continue-button"
-    disabled={
-        !formData.declarationAccepted ||
-        isSubmitting
-    }
-    onClick={onConfirm}
->
-    {isSubmitting
-        ? "Saving..."
-        : "Confirm & Proceed to Payment"
-    }
+                <button type="button" className="page2-continue-button" disabled={
+        !formData.declarationAccepted || isSubmitting  } onClick={onConfirm}>
+    {isSubmitting ? "Saving..." : "Confirm & Proceed to Payment" }
 
     <span>
         {isSubmitting ? "..." : "→"}

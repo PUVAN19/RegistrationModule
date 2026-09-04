@@ -745,6 +745,10 @@ body {
     color: #1c3fa0;
     text-decoration: underline;
 }
+.terms-error{
+    font-size:12px;
+    color:var(--university-red)
+}
 
 /* =========================================================
    REGISTER SECTION
